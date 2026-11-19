@@ -1,0 +1,180 @@
+{
+  "model": "gpt_small",
+  "params": 809856,
+  "config": {
+    "n_layer": 4,
+    "n_head": 4,
+    "n_embd": 128,
+    "block_size": 64,
+    "dropout": 0.1,
+    "batch_size": 32,
+    "steps": 5000,
+    "lr": 0.001,
+    "min_lr": 0.0001,
+    "warmup": 200,
+    "beta2": 0.99,
+    "weight_decay": 0.1,
+    "grad_clip": 1.0,
+    "eval_every": 250,
+    "sample_every": 1000,
+    "seed": 1337,
+    "vocab_size": 65
+  },
+  "best_val_loss": 1.5641482543945313,
+  "seconds": 69,
+  "history": [
+    {
+      "step": 0,
+      "lr": 5e-06,
+      "train": 4.170275506973266,
+      "val": 4.1682057952880855
+    },
+    {
+      "step": 250,
+      "lr": 0.0009997590643643646,
+      "train": 2.396329193115234,
+      "val": 2.394153850078583
+    },
+    {
+      "step": 500,
+      "lr": 0.0009913533761814538,
+      "train": 2.1399268531799316,
+      "val": 2.1718648052215577
+    },
+    {
+      "step": 750,
+      "lr": 0.0009711576670407966,
+      "train": 1.9880324745178222,
+      "val": 2.0390040707588195
+    },
+    {
+      "step": 1000,
+      "lr": 0.0009397114317029975,
+      "train": 1.8856398808956145,
+      "val": 1.9703692376613617
+    },
+    {
+      "step": 1250,
+      "lr": 0.0008978547040132316,
+      "train": 1.800322221517563,
+      "val": 1.9177236676216125
+    },
+    {
+      "step": 1500,
+      "lr": 0.000846705616795031,
+      "train": 1.7306095492839813,
+      "val": 1.8719583761692047
+    },
+    {
+      "step": 1750,
+      "lr": 0.0007876305327926657,
+      "train": 1.6872654461860657,
+      "val": 1.8334960675239562
+    },
+    {
+      "step": 2000,
+      "lr": 0.0007222075445642905,
+      "train": 1.6473838293552399,
+      "val": 1.7798475849628448
+    },
+    {
+      "step": 2250,
+      "lr": 0.000652184318365468,
+      "train": 1.6083325481414794,
+      "val": 1.7443272078037262
+    },
+    {
+      "step": 2500,
+      "lr": 0.0005794314081535644,
+      "train": 1.5848401153087617,
+      "val": 1.7036938607692718
+    },
+    {
+      "step": 2750,
+      "lr": 0.0005058922868516978,
+      "train": 1.5528087317943573,
+      "val": 1.68581383228302
+    },
+    {
+      "step": 3000,
+      "lr": 0.0004335314297038656,
+      "train": 1.527940673828125,
+      "val": 1.663629368543625
+    },
+    {
+      "step": 3250,
+      "lr": 0.00036428183658802237,
+      "train": 1.5057170939445497,
+      "val": 1.6423105931282043
+    },
+    {
+      "step": 3500,
+      "lr": 0.00029999339514117913,
+      "train": 1.495587557554245,
+      "val": 1.6252618503570557
+    },
+    {
+      "step": 3750,
+      "lr": 0.0002423834640897079,
+      "train": 1.4783881938457488,
+      "val": 1.6124680030345917
+    },
+    {
+      "step": 4000,
+      "lr": 0.00019299099686894422,
+      "train": 1.470640949010849,
+      "val": 1.5995603728294372
+    },
+    {
+      "step": 4250,
+      "lr": 0.0001531354310432403,
+      "train": 1.458638027906418,
+      "val": 1.5869902861118317
+    },
+    {
+      "step": 4500,
+      "lr": 0.0001238814417272025,
+      "train": 1.452340282201767,
+      "val": 1.5747200739383698
+    },
+    {
+      "step": 4750,
+      "lr": 0.00010601050056180446,
+      "train": 1.438856325149536,
+      "val": 1.5725383949279785
+    },
+    {
+      "step": 5000,
+      "lr": 0.0001,
+      "train": 1.4390722143650054,
+      "val": 1.5641482543945313
+    }
+  ],
+  "samples": [
+    {
+      "step": 0,
+      "text": "\nkhR$sNpE;M3bZokcxfEECnTjjf.LV\ndFb??t3iiOxqIwR,c:Mm'i.B-xdur gjgSSs-jBPPWBhAVJJd$vyr-H$d,RuAg;;OXD3xBrxqVjc$H-DdCHIiit?!gvdPukQu''3 GnugQzjMOLWmShWRAlNbrKnKqDHfqCFcv.PT&KmNDLjpuSii$yfQn&&e'EnBykhlka?-DS;yv-UHI:H\n$AkatdNv\n3K'omJ'k.LLQ.-mMrrZkYEPE$i?.bd"
+    },
+    {
+      "step": 1000,
+      "text": "\nTo forming: sin morouse anl, Engtler at cour'd same;\nUndrive, wand our weeilf but; the all will we\nCencans thou, and in bech woould dee so hold\nprofes dike the so maugh af aleny's blie gaaiin make afle\nSich of Farst's proplove an weee bragoce!\n\n\nSeon"
+    },
+    {
+      "step": 2000,
+      "text": "\nGentle to ear,\nI how for this from melselvent-merch\nTo from of think mandorchan me; hou feide as and hear;\nIn all old the Good leave heaves crive aven\nOr vounry priantle and of your prive\nThe cheek their calousing of do frayst,\nIf it is supper, I wis"
+    },
+    {
+      "step": 3000,
+      "text": "\nI'll over\nAn done us be nears: at servh no give in roor;\nthe would heavens staf! or my son!\n\nKING HARTH:\nA yet is love's good brust the not trueight.\n\nCLIFF:\nWhy, think me I canst to well know. How her, not mourter\nThough is worder you seter thy take"
+    },
+    {
+      "step": 4000,
+      "text": "\nYou wilt spoke blood! Mine of Hereford,\nExfort revery advictas he body some when himself\nIs proclain pyor a ran horself good soilf's piece\nWhich have war to daughter, which beloveds and earth.\nWhat y, little that slaw a lees case, that love betters t"
+    },
+    {
+      "step": 5000,
+      "text": "\nA gagin Bolingbroke, I still that leave to me\nPrison himself, and changs, when our from holy-brind slawful\nTo other to right; was in the here in unquies\n'Tis enough loves, like me be? Thou art they iding.\n\nDUCHESS OF YORK:\nI not can Leixt Somerlus an"
+    }
+  ],
+  "final_sample": "\nJest?\n\nCOMINIUS:\nThrows and what more the house hands Luckshy'roper,\nA lords of thy east.\n\nISABELLA:\nAnd sineith and I am so consmer.\n\nCAPULET:\nSo suitting me, no wordship you, take then,\nBut I have is I'll promition part is an\nweepuled such and make send something to foe,\nFoul: and yet reasols too die; and was stalk,\nBut so beyeding time wastory decks of Elpious!\nThen she stakes he sweet.\nHath murders, pakence that taless fluddy knows sting\nThy fatathe, I know was in thy fearful into\nA blood fathers full tress knees, and by the winners,\nTurn my laughters the shoots of this enched\nWe death dig"
+}

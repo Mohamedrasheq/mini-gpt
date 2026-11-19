@@ -1,0 +1,180 @@
+{
+  "model": "gpt_full",
+  "params": 10770816,
+  "config": {
+    "n_layer": 6,
+    "n_head": 6,
+    "n_embd": 384,
+    "block_size": 256,
+    "dropout": 0.2,
+    "batch_size": 64,
+    "steps": 5000,
+    "lr": 0.001,
+    "min_lr": 0.0001,
+    "warmup": 100,
+    "beta2": 0.99,
+    "weight_decay": 0.1,
+    "grad_clip": 1.0,
+    "eval_every": 250,
+    "sample_every": 1000,
+    "seed": 1337,
+    "vocab_size": 65
+  },
+  "best_val_loss": 1.384582498073578,
+  "seconds": 4186,
+  "history": [
+    {
+      "step": 0,
+      "lr": 1e-05,
+      "train": 4.302891964912415,
+      "val": 4.301331043243408
+    },
+    {
+      "step": 250,
+      "lr": 0.0009979206008271391,
+      "train": 1.9310816884040833,
+      "val": 2.0239089345932006
+    },
+    {
+      "step": 500,
+      "lr": 0.0009852826883675631,
+      "train": 1.5240224993228912,
+      "val": 1.686960483789444
+    },
+    {
+      "step": 750,
+      "lr": 0.0009614856803571157,
+      "train": 1.34524307847023,
+      "val": 1.4961562490463256
+    },
+    {
+      "step": 1000,
+      "lr": 0.0009271396472013282,
+      "train": 1.2594328904151917,
+      "val": 1.4396625757217407
+    },
+    {
+      "step": 1250,
+      "lr": 0.000883125098683892,
+      "train": 1.1950936686992646,
+      "val": 1.4086510419845581
+    },
+    {
+      "step": 1500,
+      "lr": 0.0008305704108364302,
+      "train": 1.143252398967743,
+      "val": 1.4035906350612641
+    },
+    {
+      "step": 1750,
+      "lr": 0.0007708228984017721,
+      "train": 1.0910138773918152,
+      "val": 1.384582498073578
+    },
+    {
+      "step": 2000,
+      "lr": 0.0007054142744895884,
+      "train": 1.0452366626262666,
+      "val": 1.3886439633369445
+    },
+    {
+      "step": 2250,
+      "lr": 0.0006360213829156177,
+      "train": 0.9946016854047776,
+      "val": 1.4025505435466767
+    },
+    {
+      "step": 2500,
+      "lr": 0.000564423209907245,
+      "train": 0.9422786462306977,
+      "val": 1.4146615493297576
+    },
+    {
+      "step": 2750,
+      "lr": 0.0004924552772419723,
+      "train": 0.8910233771800995,
+      "val": 1.4264677691459655
+    },
+    {
+      "step": 3000,
+      "lr": 0.0004219625860160354,
+      "train": 0.8453811091184616,
+      "val": 1.461956913471222
+    },
+    {
+      "step": 3250,
+      "lr": 0.00035475231739709885,
+      "train": 0.7958587157726288,
+      "val": 1.4845203959941864
+    },
+    {
+      "step": 3500,
+      "lr": 0.0002925475029450237,
+      "train": 0.7548433637619019,
+      "val": 1.500505598783493
+    },
+    {
+      "step": 3750,
+      "lr": 0.00023694285222843113,
+      "train": 0.7120784139633178,
+      "val": 1.518104236125946
+    },
+    {
+      "step": 4000,
+      "lr": 0.00018936387015941957,
+      "train": 0.679657553434372,
+      "val": 1.556049917936325
+    },
+    {
+      "step": 4250,
+      "lr": 0.00015103031213214996,
+      "train": 0.651398064494133,
+      "val": 1.5695208275318147
+    },
+    {
+      "step": 4500,
+      "lr": 0.00012292491384519912,
+      "train": 0.629954943060875,
+      "val": 1.5880626356601715
+    },
+    {
+      "step": 4750,
+      "lr": 0.00010576819746349742,
+      "train": 0.6096024012565613,
+      "val": 1.5956221103668213
+    },
+    {
+      "step": 5000,
+      "lr": 0.0001,
+      "train": 0.5929581582546234,
+      "val": 1.6159783792495728
+    }
+  ],
+  "samples": [
+    {
+      "step": 0,
+      "text": "\nfhR$snp$;M3bB3FcxfEECnIhjf.LV\ndbb??t3BNN-qIwRFc:Im'T,B-xduqZgjg-SskjZPPWBhoVdddevgrWN$v,RdAg;;OXD3FBlxqVjc$H-DdCHIiU!Q!gkdPukQu'd3 GOugQzjMOqWmSJWWA!NbrKnKqDHfqCOOv.P$WKmNDL$puSii:yfQn&&e'EnBykhlkc?JDS;yvWdHI:H\nQAkatdNv\n3K'omJ'k.ZaQ.-mMrrJkYEPEdiv.bd"
+    },
+    {
+      "step": 1000,
+      "text": "\nO VINCENTIO:\nYe need that have with served me from them,\nAnd fight's sighs for the othery of your king;\nYour haird, and she been lives it the give, a tear, your\nmoughty maid when I did our able faces, in Henry's power;\nBut in his truth and friends fr"
+    },
+    {
+      "step": 2000,
+      "text": "\nCOMINIUS:\nBy corn and brief tears\nNe'er the Rome hath proved alive;\nOr's squa sense the thwater of wounds.\n\nVOLUMNIA:\nO, now,\nI was relented to hear, in the hare I\nRecompense must be fool'd.\n\nMENENIUS:\nBe proud,\nBe more of this: on Marcius must hand,"
+    },
+    {
+      "step": 3000,
+      "text": "\nf it be not discontented;\nAnd, Warwick, that being married and many of him\nAs well-applied as an assemblance.\n\nGLOUCESTER:\nPut the while I be\nA clouds of the gates, my lord.\n\nLADY ANNE:\nMy liege, I say, my husband is George.\n\nGLOUCESTER:\nMarry, and t"
+    },
+    {
+      "step": 4000,
+      "text": "\nVOLUMNIA:\nI cannot forth it:\nAnd pray you, good madam.\n\nMENENIUS:\nMore worthy maid fellows than those was forenoon,\nThat you have put me. Nay, trusty Marcius;\nWhat had you tender o'er a trencher?\n\nMARCIUS:\nMenenius are truer than when he entreats gre"
+    },
+    {
+      "step": 5000,
+      "text": "\nEDWARD:\nMy soul, when he comes, and shrieks to kiss the crown,\nAs far as for the secret time would enjoy,\nAs they are had provided to true friends,\nAs one the wag of death hath cried 'God save true from the heaven!'\nO, Norfolk, for I see, hate up my "
+    }
+  ],
+  "final_sample": "\nDesire there that which is he is, and all the duke.\nO Bolingbroke he wrinks and the heavy\nFrozen Soulshmen that more wrong'd grace!\nGod hearts, be kill'd else his law in this brother law;\nAnd much as he's growth to the sea,\nThat every whom Guard shall not stand us with me.\n\nBUCKINGHAM:\nSay, my lord, my lord, why, son Somerset: cheerle hath my gainst men\nAnd yet have knowledged unto an outward;\nAnd many o, for, let them command their pity,\nI do sream for the Duke of Norfolk can welcome.\nSend to him ere his two hands; for by looking him\nBut fearfully; and being to timely death.\nBut is for ever o"
+}

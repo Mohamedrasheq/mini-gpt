@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mini GPT Report</title>
+<style>
+:root { --bg:#fafaf8; --panel:#fff; --ink:#1d1d1f; --mute:#6b6b70; --line:#e4e4e0; --train:#8a8a90; --val:#d9480f;
+        --accent:#d9480f; --hi:#fff3eb; --zone:rgba(217,72,15,.07); --bar:#c9c9ce; }
+@media (prefers-color-scheme: dark) {
+ :root { --bg:#141416; --panel:#1c1c1f; --ink:#ececee; --mute:#9a9aa2; --line:#2e2e33; --train:#8a8a92; --val:#ff8a4c;
+         --accent:#ff8a4c; --hi:#2a1d15; --zone:rgba(255,138,76,.09); --bar:#45454c; } }
+* { box-sizing:border-box }
+body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.55 -apple-system,system-ui,sans-serif }
+main { max-width:860px; margin:0 auto; padding:32px 16px 64px }
+h1 { font-size:28px; margin:0 0 4px } h2 { font-size:19px; margin:40px 0 8px }
+.sub { color:var(--mute); margin:0 0 24px }
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:12px }
+.tile { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px }
+.t-l { color:var(--mute); font-size:13px } .t-v { font-size:26px; font-weight:650; margin:2px 0 } .t-s { color:var(--mute); font-size:12.5px }
+.panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; overflow-x:auto }
+ul.points { margin:8px 0 0; padding-left:20px } ul.points li { margin:3px 0 }
+table { width:100%; border-collapse:collapse; font-size:14px }
+th,td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); white-space:nowrap }
+th { color:var(--mute); font-weight:600; font-size:12.5px } td.n,th.n { text-align:right; font-variant-numeric:tabular-nums }
+tr.hi td { background:var(--hi); font-weight:600 }
+.chart { width:100%; height:auto; display:block }
+.grid { stroke:var(--line) } .tick,.lab,.val,.ann { fill:var(--mute); font-size:12px } .lab { fill:var(--ink); font-size:13px }
+.ann { fill:var(--accent); font-weight:600 }
+.s-train { fill:none; stroke:var(--train); stroke-width:2; stroke-dasharray:5 4 } .s-val { fill:none; stroke:var(--val); stroke-width:2.5 }
+.best-dot { fill:var(--accent) } .zone { fill:var(--zone) } .zone-label { fill:var(--accent); font-size:12px }
+.bar { fill:var(--bar) } .bar-hi { fill:var(--accent) }
+.legend { display:flex; gap:18px; color:var(--mute); font-size:13px; margin-top:6px }
+.sw { display:inline-block; width:18px; height:3px; vertical-align:middle; margin-right:6px }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px }
+.card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px; min-width:0 }
+.card-h { font-weight:650; font-size:14px } .card-sub { color:var(--mute); font-size:12.5px }
+pre { white-space:pre-wrap; word-break:break-word; font:12.5px/1.5 ui-monospace,Menlo,monospace; margin:8px 0 0 }
+details summary { cursor:pointer; color:var(--mute); margin-top:10px }
+</style></head><body><main>
+
+<h1>Mini GPT: test report</h1>
+<p class="sub">Model 4 (GPT full): a 10.8M-parameter GPT written from scratch and trained on Tiny Shakespeare, one character at a time.</p>
+
+<div class="tiles"><div class="tile"><div class="t-l">Parameters</div><div class="t-v">10.8 M</div><div class="t-s">our own, trained from random</div></div><div class="tile"><div class="t-l">Best val loss</div><div class="t-v">1.385</div><div class="t-s">step 1750 of 5000</div></div><div class="tile"><div class="t-l">Test loss (honest)</div><div class="t-v">1.536</div><div class="t-s">perplexity 4.65</div></div><div class="tile"><div class="t-l">Training time</div><div class="t-v">70 min</div><div class="t-s">Mac GPU (MPS)</div></div></div>
+
+<h2>Verdict</h2>
+<div class="panel"><ul class="points">
+<li><b>Good at:</b> layout, speaker names, spelling, old-English style. It even pairs ROMEO with JULIET and LADY CAPULET.</li>
+<li><b>Weak at:</b> meaning. Sentences sound like Shakespeare but don't make sense.</li>
+<li><b>Why:</b> it reads single characters and learned from only 1 MB of text, so most of its effort goes on spelling.</li>
+<li><b>Best settings for writing:</b> temperature about 0.8, top-k 10.</li>
+</ul></div>
+
+<h2>1. Training curve (model 4)</h2>
+<div class="panel"><svg viewBox="0 0 760 320" class="chart" role="img" aria-label="Training and validation loss"><rect x="291.6" y="16" width="452.4" height="268" class="zone"/><text x="517.8" y="34" class="zone-label" text-anchor="middle">overfitting: memorising, not learning</text><line x1="48" x2="744" y1="250.5" y2="250.5" class="grid"/><text x="40" y="254.5" text-anchor="end" class="tick">1</text><line x1="48" x2="744" y1="183.5" y2="183.5" class="grid"/><text x="40" y="187.5" text-anchor="end" class="tick">2</text><line x1="48" x2="744" y1="116.5" y2="116.5" class="grid"/><text x="40" y="120.5" text-anchor="end" class="tick">3</text><line x1="48" x2="744" y1="49.5" y2="49.5" class="grid"/><text x="40" y="53.5" text-anchor="end" class="tick">4</text><text x="48.0" y="308" text-anchor="middle" class="tick">0</text><text x="187.2" y="308" text-anchor="middle" class="tick">1000</text><text x="326.4" y="308" text-anchor="middle" class="tick">2000</text><text x="465.6" y="308" text-anchor="middle" class="tick">3000</text><text x="604.8" y="308" text-anchor="middle" class="tick">4000</text><text x="744.0" y="308" text-anchor="middle" class="tick">5000</text><polyline points="48.0,29.2 82.8,188.1 117.6,215.4 152.4,227.4 187.2,233.1 222.0,237.4 256.8,240.9 291.6,244.4 326.4,247.5 361.2,250.9 396.0,254.4 430.8,257.8 465.6,260.9 500.4,264.2 535.2,266.9 570.0,269.8 604.8,272.0 639.6,273.9 674.4,275.3 709.2,276.7 744.0,277.8" class="s-train"/><polyline points="48.0,29.3 82.8,181.9 117.6,204.5 152.4,217.3 187.2,221.0 222.0,223.1 256.8,223.5 291.6,224.7 326.4,224.5 361.2,223.5 396.0,222.7 430.8,221.9 465.6,219.5 500.4,218.0 535.2,217.0 570.0,215.8 604.8,213.2 639.6,212.3 674.4,211.1 709.2,210.6 744.0,209.2" class="s-val"/><circle cx="291.6" cy="224.7" r="5" class="best-dot"/><text x="283.6" y="246.7" text-anchor="end" class="ann">best: step 1750, val 1.385 (saved)</text></svg>
+<div class="legend"><span><span class="sw" style="background:var(--train)"></span>train loss (text it learns from)</span>
+<span><span class="sw" style="background:var(--val)"></span>val loss (text it never trains on)</span></div>
+<ul class="points">
+<li>Both lines fall together until <b>step 1750</b>, where the model is learning real patterns.</li>
+<li>After that, train keeps falling (1.09 → 0.59) but val rises (1.385 → 1.616). It's memorising.</li>
+<li>We kept the step-1750 checkpoint, not the last one. The last ~65% of training added nothing.</li>
+</ul>
+<details><summary>All checkpoints</summary>
+<table><tr><th class="n">Step</th><th class="n">Train</th><th class="n">Val</th><th class="n">Gap</th><th class="n">Val perplexity</th></tr><tr class=""><td class="n">0</td><td class="n">4.303</td><td class="n">4.301</td><td class="n">-0.002</td><td class="n">73.80</td></tr><tr class=""><td class="n">250</td><td class="n">1.931</td><td class="n">2.024</td><td class="n">+0.093</td><td class="n">7.57</td></tr><tr class=""><td class="n">500</td><td class="n">1.524</td><td class="n">1.687</td><td class="n">+0.163</td><td class="n">5.40</td></tr><tr class=""><td class="n">750</td><td class="n">1.345</td><td class="n">1.496</td><td class="n">+0.151</td><td class="n">4.46</td></tr><tr class=""><td class="n">1000</td><td class="n">1.259</td><td class="n">1.440</td><td class="n">+0.180</td><td class="n">4.22</td></tr><tr class=""><td class="n">1250</td><td class="n">1.195</td><td class="n">1.409</td><td class="n">+0.214</td><td class="n">4.09</td></tr><tr class=""><td class="n">1500</td><td class="n">1.143</td><td class="n">1.404</td><td class="n">+0.260</td><td class="n">4.07</td></tr><tr class="hi"><td class="n">1750</td><td class="n">1.091</td><td class="n">1.385</td><td class="n">+0.294</td><td class="n">3.99</td></tr><tr class=""><td class="n">2000</td><td class="n">1.045</td><td class="n">1.389</td><td class="n">+0.343</td><td class="n">4.01</td></tr><tr class=""><td class="n">2250</td><td class="n">0.995</td><td class="n">1.403</td><td class="n">+0.408</td><td class="n">4.07</td></tr><tr class=""><td class="n">2500</td><td class="n">0.942</td><td class="n">1.415</td><td class="n">+0.472</td><td class="n">4.12</td></tr><tr class=""><td class="n">2750</td><td class="n">0.891</td><td class="n">1.426</td><td class="n">+0.535</td><td class="n">4.16</td></tr><tr class=""><td class="n">3000</td><td class="n">0.845</td><td class="n">1.462</td><td class="n">+0.617</td><td class="n">4.31</td></tr><tr class=""><td class="n">3250</td><td class="n">0.796</td><td class="n">1.485</td><td class="n">+0.689</td><td class="n">4.41</td></tr><tr class=""><td class="n">3500</td><td class="n">0.755</td><td class="n">1.501</td><td class="n">+0.746</td><td class="n">4.48</td></tr><tr class=""><td class="n">3750</td><td class="n">0.712</td><td class="n">1.518</td><td class="n">+0.806</td><td class="n">4.56</td></tr><tr class=""><td class="n">4000</td><td class="n">0.680</td><td class="n">1.556</td><td class="n">+0.876</td><td class="n">4.74</td></tr><tr class=""><td class="n">4250</td><td class="n">0.651</td><td class="n">1.570</td><td class="n">+0.918</td><td class="n">4.80</td></tr><tr class=""><td class="n">4500</td><td class="n">0.630</td><td class="n">1.588</td><td class="n">+0.958</td><td class="n">4.89</td></tr><tr class=""><td class="n">4750</td><td class="n">0.610</td><td class="n">1.596</td><td class="n">+0.986</td><td class="n">4.93</td></tr><tr class=""><td class="n">5000</td><td class="n">0.593</td><td class="n">1.616</td><td class="n">+1.023</td><td class="n">5.03</td></tr></table>
+</details></div>
+
+<h2>2. Test score: the honest number</h2>
+<div class="panel">
+<table><tr><th>Split</th><th>What it is</th><th class="n">Loss</th><th class="n">Perplexity</th><th class="n">Characters</th></tr>
+<tr><td>Val</td><td>mostly <i>The Taming of the Shrew</i></td><td class="n">1.380</td><td class="n">3.98</td><td class="n">55,808</td></tr>
+<tr class="hi"><td>Test</td><td>mostly <i>The Tempest</i>, never seen</td><td class="n">1.536</td><td class="n">4.65</td><td class="n">55,552</td></tr></table>
+<ul class="points">
+<li>Every character is scored once, in order (no random batches), so the number is the same every run.</li>
+<li>Test is +0.156 worse because it's a different play: 62% of its speeches are by characters never seen in training (val: 7%).</li>
+<li>GPT small shows the same gap (1.571 → 1.688), so this comes from the data, not a bug.</li>
+<li>Perplexity 4.65 means that, on new text, the model is about as unsure as picking between ~5 equally likely characters (out of 65).</li>
+</ul></div>
+
+<h2>3. How we got here: all models</h2>
+<div class="panel"><svg viewBox="0 0 760 200" class="chart" role="img" aria-label="Validation loss by model"><text x="140" y="23.0" text-anchor="end" class="lab">Random guess</text><rect x="150" y="5" width="500.9" height="26" rx="4" class="bar"/><text x="658.9" y="23.0" class="val">4.174</text><text x="140" y="61.0" text-anchor="end" class="lab">Bigram</text><rect x="150" y="43" width="297.0" height="26" rx="4" class="bar"/><text x="455.0" y="61.0" class="val">2.475</text><text x="140" y="99.0" text-anchor="end" class="lab">1-head attention</text><rect x="150" y="81" width="279.6" height="26" rx="4" class="bar"/><text x="437.6" y="99.0" class="val">2.330</text><text x="140" y="137.0" text-anchor="end" class="lab">GPT small</text><rect x="150" y="119" width="187.7" height="26" rx="4" class="bar"/><text x="345.7" y="137.0" class="val">1.564</text><text x="140" y="175.0" text-anchor="end" class="lab">GPT full (model 4)</text><rect x="150" y="157" width="166.1" height="26" rx="4" class="bar-hi"/><text x="324.1" y="175.0" class="val">1.385</text></svg>
+<p class="sub" style="margin:6px 0 12px">Best val loss, where lower is better.</p>
+<table><tr><th>Model</th><th>What it can do</th><th class="n">Parameters</th><th class="n">Val loss</th><th class="n">Perplexity</th><th class="n">Test loss</th><th class="n">Time</th></tr><tr class=""><td>Random guess</td><td>Picks any of 65 characters</td><td class="n">0</td><td class="n">4.174</td><td class="n">65.00</td><td class="n">-</td><td class="n">-</td></tr><tr class=""><td>Bigram</td><td>Sees only the current character</td><td class="n">4,225</td><td class="n">2.475</td><td class="n">11.88</td><td class="n">-</td><td class="n">4 s</td></tr><tr class=""><td>1-head attention</td><td>Looks back 32 characters</td><td class="n">22,721</td><td class="n">2.330</td><td class="n">10.28</td><td class="n">-</td><td class="n">12 s</td></tr><tr class=""><td>GPT small</td><td>4 layers, looks back 64</td><td class="n">809,856</td><td class="n">1.564</td><td class="n">4.78</td><td class="n">1.688</td><td class="n">69 s</td></tr><tr class="hi"><td>GPT full (model 4)</td><td>6 layers, looks back 256</td><td class="n">10,770,816</td><td class="n">1.385</td><td class="n">3.99</td><td class="n">1.536</td><td class="n">70 min</td></tr></table>
+</div>
+
+<h2>4. Text while it trained (model 4)</h2>
+<p class="sub">Same start every time, written at each checkpoint during training.</p>
+<div class="cards"><div class="card"><div class="card-h">Step 0 (random start)</div><pre>fhR$snp$;M3bB3FcxfEECnIhjf.LV
+dbb??t3BNN-qIwRFc:Im&#x27;T,B-xduqZgjg-SskjZPPWBhoVdddevgrWN$v,RdAg;;OXD3FBlxqVjc$H-DdCHIiU!Q!gkdPukQu&#x27;d3 GOugQzjMOqWmSJWWA!NbrKnKqDHfqCOOv.P$WKmNDL$puSii:yfQn&amp;&amp;e&#x27;EnBykhlkc?JDS;yvWdHI:H
+QAkatdNv
+3K&#x27;omJ&#x27;k.ZaQ.-mMrrJkYEPEdiv.bd</pre></div><div class="card"><div class="card-h">Step 1000</div><pre>O VINCENTIO:
+Ye need that have with served me from them,
+And fight&#x27;s sighs for the othery of your king;
+Your haird, and she been lives it the give, a tear, your
+moughty maid when I did our able faces, in Henry&#x27;s power;
+But in his truth and friends fr</pre></div><div class="card"><div class="card-h">Step 2000 (overfitting)</div><pre>COMINIUS:
+By corn and brief tears
+Ne&#x27;er the Rome hath proved alive;
+Or&#x27;s squa sense the thwater of wounds.
+
+VOLUMNIA:
+O, now,
+I was relented to hear, in the hare I
+Recompense must be fool&#x27;d.
+
+MENENIUS:
+Be proud,
+Be more of this: on Marcius must hand,</pre></div><div class="card"><div class="card-h">Step 3000 (overfitting)</div><pre>f it be not discontented;
+And, Warwick, that being married and many of him
+As well-applied as an assemblance.
+
+GLOUCESTER:
+Put the while I be
+A clouds of the gates, my lord.
+
+LADY ANNE:
+My liege, I say, my husband is George.
+
+GLOUCESTER:
+Marry, and t</pre></div><div class="card"><div class="card-h">Step 4000 (overfitting)</div><pre>VOLUMNIA:
+I cannot forth it:
+And pray you, good madam.
+
+MENENIUS:
+More worthy maid fellows than those was forenoon,
+That you have put me. Nay, trusty Marcius;
+What had you tender o&#x27;er a trencher?
+
+MARCIUS:
+Menenius are truer than when he entreats gre</pre></div><div class="card"><div class="card-h">Step 5000 (overfitting)</div><pre>EDWARD:
+My soul, when he comes, and shrieks to kiss the crown,
+As far as for the secret time would enjoy,
+As they are had provided to true friends,
+As one the wag of death hath cried &#x27;God save true from the heaven!&#x27;
+O, Norfolk, for I see, hate up my</pre></div></div>
+
+<h2>5. Text at different temperatures (best model)</h2>
+<p class="sub">Start: "ROMEO:". Same seed, only the setting changes.</p>
+<div class="cards"><div class="card"><div class="card-h">Temperature 0.5</div><div class="card-sub">Safe: clean but repetitive</div><pre>ROMEO:
+What news?
+
+JULIET:
+What! what, wilt thou love?
+
+JULIET:
+Good lords, I say thou hast scorn to have thee,
+Or shall thy son and my wife be to heavy face,
+That I should not such a good for my service.
+
+LADY CAPULET:
+Well, well, my lord, the lord will be so far as they
+Show thee them fair hands: thou a</pre></div><div class="card"><div class="card-h">Temperature 0.8, top-k 10</div><div class="card-sub">Balanced: our recommended setting</div><pre>ROMEO:
+What news?
+
+JULIET:
+What! it is the mayor?
+
+Nurse:
+That is my lord.
+
+LADY CAPULET:
+Welcome to Romeo, murderer: if thy
+sister; but thou shalt seem for the sun is no merry.
+
+LADY CAPULET:
+Where is the nuptial sons to the war?
+
+Nurse:
+My heart is my choice: say you have my sweet man
+Than have honour&#x27;d</pre></div><div class="card"><div class="card-h">Temperature 1.0</div><div class="card-sub">Normal: as trained</div><pre>ROMEO:
+Worthy York in a conest way
+That prevailing rich to the clombs with his men
+Must his scave bedward! it is no best thy
+Reply brother&#x27;s blood: seeing wolf?
+Staying with your hours
+Stands flower-pack&#x27;d noticutors,
+A meddly sentenced new incapeding.
+
+ROMEO:
+But a man betroth&#x27;d enoughly profaned:
+The da</pre></div><div class="card"><div class="card-h">Temperature 1.5</div><div class="card-sub">Wild: creative but broken spelling</div><pre>ROMEO:
+WorthniYman in a canest way
+That&#x27;s n&#x27;s victory: stand from myself,
+Yourselves on him.
+
+CAMILLO:
+Did not Icquit its nof mild,
+Immitted by than evil my labour
+Tilth you you&#x27;ll throw batwedly several honourably:
+Ere I guere enter&#x27;d and yield,
+Dinnicationed frame me drab.
+To hWeepingly I bharding I am </pre></div></div>
+
+<h2>6. Setup</h2>
+<div class="panel"><ul class="points">
+<li><b>Data:</b> Tiny Shakespeare (1.1M characters), split by position into 90% train / 5% val / 5% test.</li>
+<li><b>Tokenizer:</b> 65 characters, built from the train text only.</li>
+<li><b>Model:</b> 6 layers, 6 heads, width 384, context 256 characters, dropout 0.2, GPT-2 design.</li>
+<li><b>Training:</b> 5000 steps, batch 64, AdamW, learning rate 0.001 with warm-up then cosine to 0.0001, weight decay 0.1, gradient clip 1.0.</li>
+<li><b>Next ideas:</b> a BPE tokenizer (word pieces), more data (TinyStories), stopping earlier.</li>
+</ul></div>
+
+</main></body></html>

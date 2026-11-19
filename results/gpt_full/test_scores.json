@@ -1,0 +1,13 @@
+{
+  "model": "gpt_full",
+  "val": {
+    "loss": 1.3804,
+    "perplexity": 3.977,
+    "characters": 55808
+  },
+  "test": {
+    "loss": 1.5364,
+    "perplexity": 4.648,
+    "characters": 55552
+  }
+}

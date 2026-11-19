@@ -1,0 +1,13 @@
+# Python environment and cache
+.venv/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Model weights (large; re-create with gpt.py, or publish separately)
+*.pt
+
+# Encoded data (re-create with tokenizer.py and bpe_tokenizer.py)
+data/*.bin
