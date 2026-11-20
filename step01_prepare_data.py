@@ -8,7 +8,7 @@ Split by POSITION (first 90% / next 5% / last 5%), cut at a blank line so no spe
 is broken in half. Random lines would leak: near-identical lines ("All: Speak, speak.")
 would land in both train and test.
 
-Run: .venv/bin/python prepare_data.py
+Run: .venv/bin/python step01_prepare_data.py
 """
 
 from collections import Counter

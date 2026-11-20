@@ -9,27 +9,49 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from bpe_tokenizer import BPETokenizer
-from tokenizer import CharTokenizer
+from step02_char_tokenizer import CharTokenizer
+from step07_bpe_tokenizer import BPETokenizer
 
-device = "mps" if torch.backends.mps.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 tok = CharTokenizer.load()
 data = {s: torch.from_numpy(np.fromfile(f"data/{s}.bin", dtype=np.uint8).astype(np.int64))
         for s in ("train", "val", "test")}
+TOKENIZERS = {"char": (tok, data)}
 
-# step 8: the same text cut into BPE pieces (1,024-piece vocabulary)
-bpe_tok = BPETokenizer.load()
-data_bpe = {s: torch.from_numpy(np.fromfile(f"data/{s}_bpe.bin", dtype=np.uint16).astype(np.int64))
-            for s in ("train", "val", "test")}
-TOKENIZERS = {"char": (tok, data), "bpe": (bpe_tok, data_bpe)}
+# step 7: the same text cut into BPE pieces (1,024-piece vocabulary), once step07 has been run
+if Path("data/bpe_merges.json").exists() and Path("data/train_bpe.bin").exists():
+    bpe_tok = BPETokenizer.load()
+    data_bpe = {s: torch.from_numpy(np.fromfile(f"data/{s}_bpe.bin", dtype=np.uint16).astype(np.int64))
+                for s in ("train", "val", "test")}
+    TOKENIZERS["bpe"] = (bpe_tok, data_bpe)
+
+# step 8: TinyStories (4,096-token BPE + end-of-story token). 1 GB of tokens, so it is read from disk
+# on demand (memmap) instead of being loaded into memory.
+STORIES = Path("data/tinystories")
+if (STORIES / "bpe_merges.json").exists() and (STORIES / "train.bin").exists():
+    from step08_tinystories_tokenizer import StoryTokenizer
+    story_tok = StoryTokenizer.load()
+    data_stories = {s: np.memmap(STORIES / f"{s}.bin", dtype=np.uint16, mode="r") for s in ("train", "val", "test")}
+    TOKENIZERS["stories"] = (story_tok, data_stories)
+
+# characters per token on val: turns a per-token loss into a per-character one
+CHARS_PER_TOKEN = {"char": 1.0}
+if "bpe" in TOKENIZERS:
+    CHARS_PER_TOKEN["bpe"] = len(data["val"]) / len(data_bpe["val"])
+if "stories" in TOKENIZERS:
+    CHARS_PER_TOKEN["stories"] = len((STORIES / "val.txt").read_text(encoding="utf-8")) / len(data_stories["val"])
 
 
 def get_batch(split, batch_size, block_size, tokenizer="char"):
     """Random chunks of text. x = input tokens, y = the same chunk shifted by one (the answers)."""
     d = TOKENIZERS[tokenizer][1][split]
     starts = torch.randint(len(d) - block_size - 1, (batch_size,))
-    x = torch.stack([d[i:i + block_size] for i in starts])
-    y = torch.stack([d[i + 1:i + block_size + 1] for i in starts])
+    if isinstance(d, np.ndarray):   # memmap on disk (TinyStories)
+        x = torch.from_numpy(np.stack([d[i:i + block_size] for i in starts.tolist()]).astype(np.int64))
+        y = torch.from_numpy(np.stack([d[i + 1:i + block_size + 1] for i in starts.tolist()]).astype(np.int64))
+    else:
+        x = torch.stack([d[i:i + block_size] for i in starts])
+        y = torch.stack([d[i + 1:i + block_size + 1] for i in starts])
     return x.to(device), y.to(device)
 
 

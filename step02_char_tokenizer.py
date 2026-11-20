@@ -5,7 +5,7 @@ Each unique character in the TRAINING text gets one number (its position in the 
 The vocabulary is built from train only, the same rule as the data split: nothing from val/test
 is used to build any part of the model.
 
-Run: .venv/bin/python tokenizer.py
+Run: .venv/bin/python step02_char_tokenizer.py
   - builds data/vocab.json
   - encodes train / val / test into data/*.bin (one byte per character), ready for training
   - prints a demo and checks that decode(encode(text)) == text

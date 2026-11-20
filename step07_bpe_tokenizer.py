@@ -1,5 +1,5 @@
 """
-Step 8a: our own BPE tokenizer (byte-level, the same idea as GPT-2), written from scratch.
+Step 7: our own BPE tokenizer (byte-level, the same idea as GPT-2), written from scratch.
 
 How it learns (train text only):
   1. Start with 256 pieces: one for every byte (so ANY text can be encoded, nothing is "unknown").
@@ -9,7 +9,7 @@ How it learns (train text only):
 
 How it encodes new text: apply the same joins, in the same order they were learned.
 
-Run: .venv/bin/python bpe_tokenizer.py
+Run: .venv/bin/python step07_bpe_tokenizer.py
   - learns the pieces, compares vocabulary sizes, shows examples
   - saves data/bpe_merges.json and data/{train,val,test}_bpe.bin (uint16)
 """

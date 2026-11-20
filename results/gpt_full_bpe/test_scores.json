@@ -1,0 +1,15 @@
+{
+  "model": "gpt_full_bpe",
+  "val": {
+    "loss": 3.2991,
+    "perplexity": 27.088,
+    "loss_per_char": 1.4499,
+    "tokens": 24320
+  },
+  "test": {
+    "loss": 3.7048,
+    "perplexity": 40.642,
+    "loss_per_char": 1.6282,
+    "tokens": 24832
+  }
+}
