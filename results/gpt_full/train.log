@@ -1,4 +1,4 @@
-Model: gpt_full | device: mps | parameters: 10,770,816 | layers 6, heads 6, width 384, context 256
+Model: gpt_full | parameters: 10,770,816 | layers 6, heads 6, width 384, context 256
 Targets: random 4.174 | bigram 2.478 | 1-head attention 2.330
 step     0 | train 4.303 | val 4.301 | val ppl 73.80 | lr 1.0e-05 |    21s  (best, saved)
 step   250 | train 1.931 | val 2.024 | val ppl  7.57 | lr 1.0e-03 |   165s  (best, saved)

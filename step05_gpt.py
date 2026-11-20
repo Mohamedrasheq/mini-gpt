@@ -11,10 +11,11 @@ Training recipe (the one most small-GPT projects use):
   gradient clipping at 1.0, validation every N steps, keep the best checkpoint.
 
 Run:
-  .venv/bin/python gpt.py small          # ~0.8M parameters, a few minutes
-  .venv/bin/python gpt.py full           # ~10.7M parameters (nanoGPT's Shakespeare config)
-  .venv/bin/python gpt.py full --time    # only time 20 steps, to estimate the full run
-  .venv/bin/python gpt.py full_bpe       # step 8b: same model as full, but reads BPE pieces
+  .venv/bin/python step05_gpt.py small          # ~0.8M parameters, a few minutes
+  .venv/bin/python step05_gpt.py full           # ~10.7M parameters (nanoGPT's Shakespeare config)
+  .venv/bin/python step05_gpt.py full --time    # only time 20 steps, to estimate the full run
+  .venv/bin/python step05_gpt.py full_bpe       # step 7: same model as full, but reads BPE pieces
+  .venv/bin/python step05_gpt.py stories        # step 8: TinyStories, 4,096-token BPE (the longest run)
 """
 
 import json
@@ -28,7 +29,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from common import TOKENIZERS, data, device, estimate_loss, generate, get_batch
+from common import CHARS_PER_TOKEN, device, estimate_loss, generate, get_batch
 
 
 @dataclass
@@ -50,21 +51,28 @@ class Config:
     sample_every: int = 1000
     seed: int = 1337
     vocab_size: int = 65
-    tokenizer: str = "char"   # "char" (65 characters) or "bpe" (1,024 pieces, step 8)
+    tokenizer: str = "char"   # "char" (65 characters), "bpe" (1,024 pieces, step 7), "stories" (4,096, step 8)
+    start: str = "\n"         # how text samples begin
     patience: int = 0         # early stopping: stop after this many checks without a new best (0 = never)
 
 
 SIZES = {
-    # small: like nanoGPT's laptop config
+    # small: like nanoGPT's small CPU-friendly config
     "small": Config(n_layer=4, n_head=4, n_embd=128, block_size=64, dropout=0.1, batch_size=32,
                     steps=5000, lr=1e-3, min_lr=1e-4, warmup=200, beta2=0.99),
     # full: nanoGPT's train_shakespeare_char config
     "full": Config(n_layer=6, n_head=6, n_embd=384, block_size=256, dropout=0.2, batch_size=64,
                    steps=5000, lr=1e-3, min_lr=1e-4, warmup=100, beta2=0.99, eval_every=250),
-    # step 8b: exactly "full", only the tokenizer changes. Stops early once val stops improving.
+    # step 7: exactly "full", only the tokenizer changes. Stops early once val stops improving.
     "full_bpe": Config(n_layer=6, n_head=6, n_embd=384, block_size=256, dropout=0.2, batch_size=64,
                        steps=5000, lr=1e-3, min_lr=1e-4, warmup=100, beta2=0.99, eval_every=250,
                        vocab_size=1024, tokenizer="bpe", patience=4),
+    # step 8: same 6-layer design on TinyStories. 15,000 steps x 64 x 256 = 246M tokens (~20 per parameter),
+    # less than half of train, so no story is seen twice: dropout 0, like real pre-training.
+    "stories": Config(n_layer=6, n_head=6, n_embd=384, block_size=256, dropout=0.0, batch_size=64,
+                      steps=15000, lr=1e-3, min_lr=1e-4, warmup=500, beta2=0.95, eval_every=500,
+                      sample_every=2500, vocab_size=4096, tokenizer="stories", patience=6,
+                      start="Once upon a time"),
 }
 
 
@@ -160,6 +168,14 @@ class GPT(nn.Module):
 
 
 # ------------------------------------------------------------------ training
+def sync():
+    """Wait for the GPU to finish (GPU work runs in the background), so timings are real."""
+    if device == "cuda":
+        torch.cuda.synchronize()
+    elif device == "mps":
+        torch.mps.synchronize()
+
+
 def lr_at(step, c):
     """Warm up linearly, then follow a cosine curve down to min_lr."""
     if step < c.warmup:
@@ -189,8 +205,11 @@ def run(size, time_only=False):
     print(f"Model: {name} | device: {device} | parameters: {n_params:,} | layers {c.n_layer}, heads {c.n_head}, "
           f"width {c.n_embd}, context {c.block_size}")
     # BPE loss is per piece; divide by characters-per-piece to compare with the character models
-    chars_per_token = len(data["val"]) / len(TOKENIZERS[c.tokenizer][1]["val"])
-    print("Targets (per character): random 4.174 | bigram 2.478 | attention 2.330 | gpt_full val 1.385")
+    chars_per_token = CHARS_PER_TOKEN[c.tokenizer]
+    if c.tokenizer == "stories":
+        print(f"Data: TinyStories | random-guess loss ln({c.vocab_size}) = {math.log(c.vocab_size):.3f} per token")
+    else:
+        print("Targets (per character): random 4.174 | bigram 2.478 | attention 2.330 | gpt_full val 1.385")
     if c.tokenizer != "char":
         print(f"Tokenizer: {c.tokenizer}, {c.vocab_size} pieces, {chars_per_token:.2f} characters per piece "
               f"-> context {c.block_size} pieces ≈ {c.block_size * chars_per_token:.0f} characters")
@@ -198,16 +217,14 @@ def run(size, time_only=False):
     if time_only:
         for i in range(25):
             if i == 5:
-                if device == "mps":
-                    torch.mps.synchronize()
+                sync()
                 t0 = time.time()
             x, y = get_batch("train", c.batch_size, c.block_size, c.tokenizer)
             _, loss = model(x, y)
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             optimizer.step()
-        if device == "mps":
-            torch.mps.synchronize()
+        sync()
         per_step = (time.time() - t0) / 20
         est_eval = (c.steps // c.eval_every + 1) * 200 * per_step / 3   # eval = forward only, ~1/3 cost
         print(f"~{per_step * 1000:.0f} ms per step -> {c.steps} steps ≈ {(c.steps * per_step + est_eval) / 60:.0f} min "
@@ -236,12 +253,12 @@ def run(size, time_only=False):
             if c.patience and since_best >= c.patience:
                 print(f"Early stop: no new best for {c.patience} checks ({c.patience * c.eval_every} steps).")
                 samples.append({"step": step, "text": generate(model, c.block_size, round(250 / chars_per_token),
-                                                               tokenizer=c.tokenizer)})
+                                                               start=c.start, tokenizer=c.tokenizer)})
                 break
 
         if step % c.sample_every == 0:
             samples.append({"step": step, "text": generate(model, c.block_size, round(250 / chars_per_token),
-                                                           tokenizer=c.tokenizer)})
+                                                           start=c.start, tokenizer=c.tokenizer)})
 
         if step == c.steps:
             break
@@ -254,14 +271,14 @@ def run(size, time_only=False):
 
     # reload the best checkpoint and write a final sample from it
     model.load_state_dict(torch.load(out / "best.pt", map_location=device, weights_only=True))
-    final = generate(model, c.block_size, round(600 / chars_per_token), tokenizer=c.tokenizer)
+    final = generate(model, c.block_size, round(600 / chars_per_token), start=c.start, tokenizer=c.tokenizer)
     (out / "history.json").write_text(json.dumps(
         {"model": name, "params": n_params, "config": asdict(c), "best_val_loss": best,
          "best_val_per_char": best / chars_per_token, "chars_per_token": chars_per_token,
          "seconds": round(time.time() - t0), "history": history, "samples": samples, "final_sample": final},
         indent=2))
     print(f"\nBest val loss {best:.3f} (perplexity {math.exp(best):.2f}) | per character {best / chars_per_token:.3f} "
-          f"(gpt_full: 1.385) | {time.time() - t0:.0f}s total")
+          f"{'' if c.tokenizer == 'stories' else '(gpt_full: 1.385) '}| {time.time() - t0:.0f}s total")
     print(f"Saved -> {out}/best.pt, history.json")
     print("\n--- text from the best model ---")
     print(final)

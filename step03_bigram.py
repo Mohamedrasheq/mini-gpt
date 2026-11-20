@@ -5,7 +5,7 @@ The whole model is one table of 65 x 65 numbers:
   row = the current character, columns = a score for every possible next character.
 Training adjusts the table so likely pairs ("q" -> "u", "t" -> "h") get high scores.
 
-Run: .venv/bin/python bigram.py
+Run: .venv/bin/python step03_bigram.py
 """
 
 import json
@@ -18,7 +18,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from tokenizer import CharTokenizer
+from step02_char_tokenizer import CharTokenizer
 
 # ---------------- settings ----------------
 BATCH_SIZE = 32        # text chunks per training step
@@ -31,7 +31,7 @@ SEED = 1337
 OUT = Path("results/bigram")
 
 torch.manual_seed(SEED)
-device = "mps" if torch.backends.mps.is_available() else "cpu"
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 tok = CharTokenizer.load()
 data = {s: torch.from_numpy(np.fromfile(f"data/{s}.bin", dtype=np.uint8).astype(np.int64))

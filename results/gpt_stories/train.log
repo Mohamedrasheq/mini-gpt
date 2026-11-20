@@ -1,0 +1,44 @@
+Model: gpt_stories | parameters: 12,318,720 | layers 6, heads 6, width 384, context 256
+Data: TinyStories | random-guess loss ln(4096) = 8.318 per token
+Tokenizer: stories, 4096 pieces, 3.99 characters per piece -> context 256 pieces ≈ 1022 characters
+step     0 | train 8.410 | val 8.409 | val ppl 4488.34 | val per char 2.106 | lr 2.0e-06 |    25s  (best, saved)
+step   500 | train 2.617 | val 2.604 | val ppl 13.52 | val per char 0.652 | lr 1.0e-03 |   299s  (best, saved)
+step  1000 | train 2.052 | val 2.050 | val ppl  7.77 | val per char 0.513 | lr 1.0e-03 |   576s  (best, saved)
+step  1500 | train 1.875 | val 1.883 | val ppl  6.57 | val per char 0.472 | lr 9.9e-04 |   850s  (best, saved)
+step  2000 | train 1.793 | val 1.796 | val ppl  6.03 | val per char 0.450 | lr 9.8e-04 |  1123s  (best, saved)
+step  2500 | train 1.734 | val 1.735 | val ppl  5.67 | val per char 0.435 | lr 9.6e-04 |  1396s  (best, saved)
+step  3000 | train 1.689 | val 1.693 | val ppl  5.44 | val per char 0.424 | lr 9.4e-04 |  1669s  (best, saved)
+step  3500 | train 1.647 | val 1.658 | val ppl  5.25 | val per char 0.415 | lr 9.1e-04 |  1942s  (best, saved)
+step  4000 | train 1.625 | val 1.624 | val ppl  5.07 | val per char 0.407 | lr 8.8e-04 |  2214s  (best, saved)
+step  4500 | train 1.601 | val 1.600 | val ppl  4.95 | val per char 0.401 | lr 8.4e-04 |  2485s  (best, saved)
+step  5000 | train 1.582 | val 1.579 | val ppl  4.85 | val per char 0.395 | lr 8.0e-04 |  2755s  (best, saved)
+step  5500 | train 1.560 | val 1.562 | val ppl  4.77 | val per char 0.391 | lr 7.6e-04 |  3026s  (best, saved)
+step  6000 | train 1.540 | val 1.547 | val ppl  4.70 | val per char 0.388 | lr 7.2e-04 |  3298s  (best, saved)
+step  6500 | train 1.520 | val 1.526 | val ppl  4.60 | val per char 0.382 | lr 6.7e-04 |  3571s  (best, saved)
+step  7000 | train 1.513 | val 1.509 | val ppl  4.52 | val per char 0.378 | lr 6.2e-04 |  3843s  (best, saved)
+step  7500 | train 1.493 | val 1.494 | val ppl  4.46 | val per char 0.374 | lr 5.7e-04 |  4115s  (best, saved)
+step  8000 | train 1.483 | val 1.481 | val ppl  4.40 | val per char 0.371 | lr 5.3e-04 |  4387s  (best, saved)
+step  8500 | train 1.464 | val 1.469 | val ppl  4.34 | val per char 0.368 | lr 4.8e-04 |  4658s  (best, saved)
+step  9000 | train 1.452 | val 1.458 | val ppl  4.30 | val per char 0.365 | lr 4.3e-04 |  4934s  (best, saved)
+step  9500 | train 1.445 | val 1.450 | val ppl  4.26 | val per char 0.363 | lr 3.8e-04 |  5206s  (best, saved)
+step 10000 | train 1.430 | val 1.430 | val ppl  4.18 | val per char 0.358 | lr 3.4e-04 |  5477s  (best, saved)
+step 10500 | train 1.417 | val 1.424 | val ppl  4.16 | val per char 0.357 | lr 3.0e-04 |  5750s  (best, saved)
+step 11000 | train 1.404 | val 1.405 | val ppl  4.08 | val per char 0.352 | lr 2.6e-04 |  6022s  (best, saved)
+step 11500 | train 1.399 | val 1.403 | val ppl  4.07 | val per char 0.351 | lr 2.2e-04 |  6295s  (best, saved)
+step 12000 | train 1.389 | val 1.392 | val ppl  4.02 | val per char 0.349 | lr 1.9e-04 |  6575s  (best, saved)
+step 12500 | train 1.379 | val 1.380 | val ppl  3.97 | val per char 0.346 | lr 1.6e-04 |  6850s  (best, saved)
+step 13000 | train 1.377 | val 1.373 | val ppl  3.95 | val per char 0.344 | lr 1.4e-04 |  7126s  (best, saved)
+step 13500 | train 1.362 | val 1.370 | val ppl  3.94 | val per char 0.343 | lr 1.2e-04 |  7400s  (best, saved)
+step 14000 | train 1.364 | val 1.362 | val ppl  3.90 | val per char 0.341 | lr 1.1e-04 |  7673s  (best, saved)
+step 14500 | train 1.360 | val 1.363 | val ppl  3.91 | val per char 0.341 | lr 1.0e-04 |  7948s
+step 15000 | train 1.355 | val 1.368 | val ppl  3.93 | val per char 0.343 | lr 1.0e-04 |  8221s
+
+Best val loss 1.362 (perplexity 3.90) | per character 0.341 | 8222s total
+Saved -> results/gpt_stories/best.pt, history.json
+
+--- text from the best model ---
+Once upon a time, there was a smooth stone. It stood in a row near a big tree. The stone wanted to be just like the other stones.
+One day, a little girl found the smooth stone. She saw the shiny stone and said, "Wow! This stone is so pretty. I will buy it for you." The girl took the stone home.
+At home, the girl put the stone in a small bowl. She decided to pour water on the shiny stone. Soon, the smooth stone drank the water from the row. The stone was happy and so was the girl. They became friends and lived happily ever after.
+<|endoftext|>
+Tommy was a young boy who liked to play outside. One day, he saw a big tree

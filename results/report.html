@@ -36,52 +36,95 @@ pre { white-space:pre-wrap; word-break:break-word; font:12.5px/1.5 ui-monospace,
 details summary { cursor:pointer; color:var(--mute); margin-top:10px }
 </style></head><body><main>
 
-<h1>Mini GPT: test report</h1>
-<p class="sub">Model 4 (GPT full): a 10.8M-parameter GPT written from scratch and trained on Tiny Shakespeare, one character at a time.</p>
+<h1>Mini GPT: results report</h1>
+<p class="sub">Six GPT-style language models written from scratch in PyTorch and trained on a single consumer GPU. The best one, model 6, writes short stories in simple English.</p>
 
-<div class="tiles"><div class="tile"><div class="t-l">Parameters</div><div class="t-v">10.8 M</div><div class="t-s">our own, trained from random</div></div><div class="tile"><div class="t-l">Best val loss</div><div class="t-v">1.385</div><div class="t-s">step 1750 of 5000</div></div><div class="tile"><div class="t-l">Test loss (honest)</div><div class="t-v">1.536</div><div class="t-s">perplexity 4.65</div></div><div class="tile"><div class="t-l">Training time</div><div class="t-v">70 min</div><div class="t-s">Mac GPU (MPS)</div></div></div>
+<div class="tiles"><div class="tile"><div class="t-l">Model 6 parameters</div><div class="t-v">12.3 M</div><div class="t-s">our own, trained from random</div></div><div class="tile"><div class="t-l">Test loss (honest)</div><div class="t-v">1.364</div><div class="t-s">perplexity 3.91 (of 4,096 tokens)</div></div><div class="tile"><div class="t-l">Test - val gap</div><div class="t-v">-0.003</div><div class="t-s">no overfitting</div></div><div class="tile"><div class="t-l">Tokens read</div><div class="t-v">246M</div><div class="t-s">less than half of the training set</div></div></div>
 
 <h2>Verdict</h2>
 <div class="panel"><ul class="points">
-<li><b>Good at:</b> layout, speaker names, spelling, old-English style. It even pairs ROMEO with JULIET and LADY CAPULET.</li>
-<li><b>Weak at:</b> meaning. Sentences sound like Shakespeare but don't make sense.</li>
-<li><b>Why:</b> it reads single characters and learned from only 1 MB of text, so most of its effort goes on spelling.</li>
-<li><b>Best settings for writing:</b> temperature about 0.8, top-k 10.</li>
+<li><b>Model 6 (TinyStories) works:</b> correct grammar, a beginning, middle and end, dialogue, and it keeps track of who is who. It knows where a story ends.</li>
+<li><b>Still weak at:</b> small logic slips ("I will buy it for you" for a stone she found). Normal for 12M parameters.</li>
+<li><b>What made the difference:</b> data. 1 MB of Shakespeare gave made-up words; 2.2 GB of simple stories gave real English.</li>
+<li><b>Honest score:</b> test 1.364 vs val 1.366: it learned patterns, not stories.</li>
 </ul></div>
 
-<h2>1. Training curve (model 4)</h2>
+<h2>1. All models</h2>
+<div class="panel">
+<p class="sub" style="margin:0 0 8px"><b>Shakespeare models</b>, loss per character (lower is better). Models 1-5 read the same 1 MB of text.</p>
+<svg viewBox="0 0 760 238" class="chart" role="img" aria-label="Validation loss by model"><text x="140" y="23.0" text-anchor="end" class="lab">Random guess</text><rect x="150" y="5" width="500.9" height="26" rx="4" class="bar"/><text x="658.9" y="23.0" class="val">4.174</text><text x="140" y="61.0" text-anchor="end" class="lab">Bigram</text><rect x="150" y="43" width="297.0" height="26" rx="4" class="bar"/><text x="455.0" y="61.0" class="val">2.475</text><text x="140" y="99.0" text-anchor="end" class="lab">1-head attention</text><rect x="150" y="81" width="279.6" height="26" rx="4" class="bar"/><text x="437.6" y="99.0" class="val">2.330</text><text x="140" y="137.0" text-anchor="end" class="lab">GPT small</text><rect x="150" y="119" width="187.7" height="26" rx="4" class="bar"/><text x="345.7" y="137.0" class="val">1.564</text><text x="140" y="175.0" text-anchor="end" class="lab">GPT full (model 4)</text><rect x="150" y="157" width="166.1" height="26" rx="4" class="bar-hi"/><text x="324.1" y="175.0" class="val">1.385</text><text x="140" y="213.0" text-anchor="end" class="lab">GPT full BPE (model 5)</text><rect x="150" y="195" width="174.3" height="26" rx="4" class="bar"/><text x="332.3" y="213.0" class="val">1.453</text></svg>
+<table><tr><th>Model</th><th>What it can do</th><th class="n">Parameters</th><th class="n">Val loss</th><th class="n">Perplexity</th><th class="n">Test loss</th></tr><tr class=""><td>Random guess</td><td>Picks any of 65 characters</td><td class="n">0</td><td class="n">4.174</td><td class="n">65.00</td><td class="n">-</td></tr><tr class=""><td>Bigram</td><td>Sees only the current character</td><td class="n">4,225</td><td class="n">2.475</td><td class="n">11.88</td><td class="n">-</td></tr><tr class=""><td>1-head attention</td><td>Looks back 32 characters</td><td class="n">22,721</td><td class="n">2.330</td><td class="n">10.28</td><td class="n">-</td></tr><tr class=""><td>GPT small</td><td>4 layers, looks back 64</td><td class="n">809,856</td><td class="n">1.564</td><td class="n">4.78</td><td class="n">1.688</td></tr><tr class="hi"><td>GPT full (model 4)</td><td>6 layers, looks back 256</td><td class="n">10,770,816</td><td class="n">1.385</td><td class="n">3.99</td><td class="n">1.536</td></tr><tr class=""><td>GPT full BPE (model 5)</td><td>Same, reads 1,024 word pieces</td><td class="n">11,139,072</td><td class="n">1.453</td><td class="n">4.27</td><td class="n">1.628</td></tr></table>
+<p class="sub" style="margin:16px 0 8px"><b>TinyStories model</b>, loss per token (a different dataset, so not comparable with the table above).</p>
+<table><tr><th>Model</th><th>What it can do</th><th class="n">Parameters</th><th class="n">Val loss</th><th class="n">Perplexity</th><th class="n">Test loss</th></tr>
+<tr class="hi"><td>GPT stories (model 6)</td><td>6 layers, 4,096 word pieces, sees ~1,000 characters</td><td class="n">12,318,720</td><td class="n">1.362</td><td class="n">3.90</td><td class="n">1.364</td></tr></table>
+</div>
+
+<h2>2. Model 6: TinyStories</h2>
+<div class="panel"><svg viewBox="0 0 760 320" class="chart" role="img" aria-label="Training and validation loss"><line x1="48" x2="744" y1="248.7" y2="248.7" class="grid"/><text x="40" y="252.7" text-anchor="end" class="tick">2</text><line x1="48" x2="744" y1="178.2" y2="178.2" class="grid"/><text x="40" y="182.2" text-anchor="end" class="tick">4</text><line x1="48" x2="744" y1="107.7" y2="107.7" class="grid"/><text x="40" y="111.7" text-anchor="end" class="tick">6</text><line x1="48" x2="744" y1="37.2" y2="37.2" class="grid"/><text x="40" y="41.2" text-anchor="end" class="tick">8</text><text x="48.0" y="308" text-anchor="middle" class="tick">0</text><text x="164.0" y="308" text-anchor="middle" class="tick">2500</text><text x="280.0" y="308" text-anchor="middle" class="tick">5000</text><text x="396.0" y="308" text-anchor="middle" class="tick">7500</text><text x="512.0" y="308" text-anchor="middle" class="tick">10000</text><text x="628.0" y="308" text-anchor="middle" class="tick">12500</text><text x="744.0" y="308" text-anchor="middle" class="tick">15000</text><polyline points="48.0,22.7 71.2,227.0 94.4,246.9 117.6,253.1 140.8,256.0 164.0,258.1 187.2,259.7 210.4,261.2 233.6,261.9 256.8,262.8 280.0,263.5 303.2,264.3 326.4,265.0 349.6,265.7 372.8,265.9 396.0,266.6 419.2,267.0 442.4,267.6 465.6,268.0 488.8,268.3 512.0,268.9 535.2,269.3 558.4,269.8 581.6,269.9 604.8,270.3 628.0,270.6 651.2,270.7 674.4,271.2 697.6,271.2 720.8,271.3 744.0,271.5" class="s-train"/><polyline points="48.0,22.7 71.2,227.4 94.4,247.0 117.6,252.9 140.8,255.9 164.0,258.1 187.2,259.6 210.4,260.8 233.6,262.0 256.8,262.8 280.0,263.6 303.2,264.2 326.4,264.7 349.6,265.5 372.8,266.1 396.0,266.6 419.2,267.0 442.4,267.5 465.6,267.8 488.8,268.1 512.0,268.8 535.2,269.0 558.4,269.7 581.6,269.8 604.8,270.2 628.0,270.6 651.2,270.8 674.4,270.9 697.6,271.2 720.8,271.2 744.0,271.0" class="s-val"/><circle cx="697.6" cy="271.2" r="5" class="best-dot"/><text x="689.6" y="293.2" text-anchor="end" class="ann">best: step 14000, val 1.362 (saved)</text></svg>
+<div class="legend"><span><span class="sw" style="background:var(--train)"></span>train loss</span>
+<span><span class="sw" style="background:var(--val)"></span>val loss</span></div>
+<ul class="points">
+<li>Train and val stay on top of each other the whole run (1.355 vs 1.368 at the end): <b>no overfitting</b>. It read 246M tokens, less than half the training set, so it never saw a story twice.</li>
+<li>Best val 1.362 at step 14,000; the last checks only wobble around it.</li>
+</ul>
+<table><tr><th>Split</th><th>What it is</th><th class="n">Loss</th><th class="n">Perplexity</th><th class="n">Tokens</th></tr>
+<tr><td>Val</td><td>13,815 stories</td><td class="n">1.366</td><td class="n">3.92</td><td class="n">2,808,832</td></tr>
+<tr class="hi"><td>Test</td><td>13,815 other stories, never seen</td><td class="n">1.364</td><td class="n">3.91</td><td class="n">2,824,960</td></tr></table>
+</div>
+
+<h3 style="margin:24px 0 8px">The story written at the end of training</h3>
+<div class="card"><pre>Once upon a time, there was a smooth stone. It stood in a row near a big tree. The stone wanted to be just like the other stones.
+One day, a little girl found the smooth stone. She saw the shiny stone and said, &quot;Wow! This stone is so pretty. I will buy it for you.&quot; The girl took the stone home.
+At home, the girl put the stone in a small bowl. She decided to pour water on the shiny stone. Soon, the smooth stone drank the water from the row. The stone was happy and so was the girl. They became friends and lived happily ever after.</pre></div>
+
+<h3 style="margin:24px 0 8px">Stories while it trained</h3>
+<p class="sub">Start: "Once upon a time". From random tokens to a full story.</p>
+<div class="cards"><div class="card"><div class="card-h">Step 0 (random start)</div><pre>Once upon a timech candhost@� smilingdy slowly lady honest cloud warm oplandlemzy thoughgy rem half And Sarareeditylease� towel cubemb temp mel fairycut hide cave blue tease has leaf animal kindilingser soon policeup driveccol quickly pretended sharp tooth hoped ad pinch boots tease cannotject interestingule tra matt</pre></div><div class="card"><div class="card-h">Step 2500</div><pre>Once upon a time, there was aurn. The Emma was safe with lotion jumped up and down and knew she had a special moment.
+This made Emma feel good for making the flowers making was exciting to the day. She was so happy to be safe, and she continued to miss her wet paws to make a lovely for the</pre></div><div class="card"><div class="card-h">Step 5000</div><pre>Once upon a time, there was a graceful bird who loved to sing. The bird lived in a big tree with many good sangs all day long.
+One day, the bird saw a big, mean dog near the tree. The dog was trying to take things in return to the tree, but the tree was too strong for</pre></div><div class="card"><div class="card-h">Step 7500</div><pre>Once upon a time, there was a bird who wanted to go to a bath. The bird asked its mom, &quot;Mom, can we go to the bath? It is so important.&quot;
+The mom disagreed, &quot;You should just take a quick nap.&quot;
+The bird didn&#x27;t listen and took a few quick naps</pre></div><div class="card"><div class="card-h">Step 10000</div><pre>Once upon a time there was a small creature who was working in the woods. He worked inrowing lots of noises and was always trying to find food for his family.
+One day, the mouse was getting very frustrated. He stopped working and started to struggle. He was almost there, despite the others that he</pre></div><div class="card"><div class="card-h">Step 12500</div><pre>Once upon a time, there was a little girl named Mia. Mia had fancy clothes. She loved her life and was very clever. One day, Mia had to go to the store with her mom. She told her mom, &quot;I need to take my things too.&quot;
+Mia set up her and started to pack. She packed</pre></div><div class="card"><div class="card-h">Step 15000</div><pre>Once upon a time, there was a little girl named Lila. Lila was clumsy and often fell down. One day, she went to the park to swing. She liked to swing high up in the sky.
+As Lila climbed higher and higher, she saw a big tree with a big cone on the ground. She looked at the</pre></div></div>
+
+<h3 style="margin:24px 0 8px">Different temperatures</h3>
+<p class="sub">Start: "Once upon a time, there was a little cat". Same seed, only the setting changes.</p>
+<div class="cards"><div class="card"><div class="card-h">Temperature 0.5</div><div class="card-sub">Safe: very clean, a bit plain</div><pre>Once upon a time, there was a little cat named Kitty. Kitty loved to play in the garden. One day, she saw a small, fearful bug. The bug was sad because it could not find its way home. Kitty wanted to help the bug.
+Kitty said, &quot;Don&#x27;t be scared, little bug. I will help you find your home.&quot; She picked up the bug and walked through the garden. She saw many pretty flowers and big trees. Kitty thought the bug&#x27;s home was near the flowers.
+Kitty looked around and saw a big tree. She thought the bug&#x27;s home was near the tree. She walked to the tree and found the bug&#x27;s home. The bug was very happy. Kitty said, &quot;You are a good friend, little bug. I am not fearful anymore.&quot;
+[end of story]</pre></div><div class="card"><div class="card-h">Temperature 0.8, top-k 50</div><div class="card-sub">Balanced: our recommended setting</div><pre>Once upon a time, there was a little cat named Kitty. Kitty loved to play in the garden. One day, she found an interesting, big ball. She had never seen an ostrich before. Kitty wanted to play with the ball, so she ran to it.
+As Kitty got closer, she heard a voice. &quot;Hello, I am a new friend,&quot; said the voice say. Kitty looked around and saw a little boy named Tim. Tim was sad because he lost his toy. Kitty wanted to help Tim find his toy, so they both looked for it together.
+As they searched, they found a big box of toys. The toys were about to separate into two piles. Kitty and Tim decided to separate the toys into two piles. They used the box to make a big, beautiful garden with lots of toys. Tim was very happy to see the new toys and thanked Kitty for helping him. From that day on, Kitty, Tim, and the interesting ball played together in the garden every day.
+[end of story]</pre></div><div class="card"><div class="card-h">Temperature 1.0</div><div class="card-sub">Normal: as trained</div><pre>Once upon a time, there was a little cat named Kitty. Kitty loved to play in the garden. One day, she found an interesting,imject. It had a funny face on it.
+Kitty wanted to play with the pizza, but it was too high. She tried to jump and try, but she was too small. Kitty felt sad. She wanted to reach the pizza, but she did not know how.
+Just then, a big dog named Max came to help. Max told Kitty that they could reach the pizza on top of the fence. Kitty&#x27;s friends clapped and cheered for her. With Max&#x27;s help, Kitty got the interesting pizza all by herself. Kitty felt happy and shared the pizza with Max.
+[end of story]</pre></div><div class="card"><div class="card-h">Temperature 1.5</div><div class="card-sub">Wild: more surprises, more mistakes</div><pre>Once upon a time, there was a little catty patch in her dogs in makeup bags won&#x27;t fr Bobbyupted b compete likegu brother One before progeng atittle Bobby that ways until Dad caught earlbeer. animals but curiously didn&#x27;tided dictionary s liz brownized parkEvery bit. After an unTommy wheel animals arrived at Bobby’s house and familyf porked all their sunglasses down therag bigger celeryboardboard bridge left replied to sitert Onby ancientned week grow gentlyero dishl acquHer multherM Bob and Timmy ourchown?&quot; Doned Betty’s disches with journal words he shouldally&#x27;re rewardedries seat darkared fish visit over Bobby&#x27;s pictureway. And today they behwe my phone made outorry for mixing emptyness keys should take an
+[end of story]</pre></div></div>
+
+<h2>3. Model 5: BPE on Shakespeare (a useful failure)</h2>
+<div class="panel"><svg viewBox="0 0 760 320" class="chart" role="img" aria-label="Training and validation loss"><rect x="346.3" y="16" width="397.7" height="268" class="zone"/><text x="545.1" y="34" class="zone-label" text-anchor="middle">overfitting: memorising, not learning</text><line x1="48" x2="744" y1="264.9" y2="264.9" class="grid"/><text x="40" y="268.9" text-anchor="end" class="tick">1</text><line x1="48" x2="744" y1="188.3" y2="188.3" class="grid"/><text x="40" y="192.3" text-anchor="end" class="tick">3</text><line x1="48" x2="744" y1="111.7" y2="111.7" class="grid"/><text x="40" y="115.7" text-anchor="end" class="tick">5</text><line x1="48" x2="744" y1="35.1" y2="35.1" class="grid"/><text x="40" y="39.1" text-anchor="end" class="tick">7</text><text x="48.0" y="308" text-anchor="middle" class="tick">0</text><text x="246.9" y="308" text-anchor="middle" class="tick">500</text><text x="445.7" y="308" text-anchor="middle" class="tick">1000</text><text x="644.6" y="308" text-anchor="middle" class="tick">1500</text><polyline points="48.0,37.3 147.4,166.0 246.9,191.1 346.3,210.7 445.7,229.6 545.1,246.5 644.6,261.2 744.0,272.0" class="s-train"/><polyline points="48.0,37.6 147.4,159.6 246.9,174.7 346.3,176.6 445.7,170.7 545.1,161.6 644.6,153.3 744.0,142.8" class="s-val"/><circle cx="346.3" cy="176.6" r="5" class="best-dot"/><text x="338.3" y="198.6" text-anchor="end" class="ann">best: step 750, val 3.305 (saved)</text></svg>
+<ul class="points">
+<li>Same model as model 4, but reading 1,024 BPE word pieces instead of 65 characters.</li>
+<li>Best val at step 750, then heavy overfitting: train 0.81 vs val 4.19 when early stopping ended it.</li>
+<li>Per character it lost to model 4: test 1.628 vs 1.536. In pieces, 1 MB of text is only 411K training tokens, far too few for 11M parameters.</li>
+<li>Lesson: word pieces need more data. With TinyStories (558M tokens), the same idea worked.</li>
+</ul></div>
+
+<h2>4. Model 4: characters on Shakespeare</h2>
 <div class="panel"><svg viewBox="0 0 760 320" class="chart" role="img" aria-label="Training and validation loss"><rect x="291.6" y="16" width="452.4" height="268" class="zone"/><text x="517.8" y="34" class="zone-label" text-anchor="middle">overfitting: memorising, not learning</text><line x1="48" x2="744" y1="250.5" y2="250.5" class="grid"/><text x="40" y="254.5" text-anchor="end" class="tick">1</text><line x1="48" x2="744" y1="183.5" y2="183.5" class="grid"/><text x="40" y="187.5" text-anchor="end" class="tick">2</text><line x1="48" x2="744" y1="116.5" y2="116.5" class="grid"/><text x="40" y="120.5" text-anchor="end" class="tick">3</text><line x1="48" x2="744" y1="49.5" y2="49.5" class="grid"/><text x="40" y="53.5" text-anchor="end" class="tick">4</text><text x="48.0" y="308" text-anchor="middle" class="tick">0</text><text x="187.2" y="308" text-anchor="middle" class="tick">1000</text><text x="326.4" y="308" text-anchor="middle" class="tick">2000</text><text x="465.6" y="308" text-anchor="middle" class="tick">3000</text><text x="604.8" y="308" text-anchor="middle" class="tick">4000</text><text x="744.0" y="308" text-anchor="middle" class="tick">5000</text><polyline points="48.0,29.2 82.8,188.1 117.6,215.4 152.4,227.4 187.2,233.1 222.0,237.4 256.8,240.9 291.6,244.4 326.4,247.5 361.2,250.9 396.0,254.4 430.8,257.8 465.6,260.9 500.4,264.2 535.2,266.9 570.0,269.8 604.8,272.0 639.6,273.9 674.4,275.3 709.2,276.7 744.0,277.8" class="s-train"/><polyline points="48.0,29.3 82.8,181.9 117.6,204.5 152.4,217.3 187.2,221.0 222.0,223.1 256.8,223.5 291.6,224.7 326.4,224.5 361.2,223.5 396.0,222.7 430.8,221.9 465.6,219.5 500.4,218.0 535.2,217.0 570.0,215.8 604.8,213.2 639.6,212.3 674.4,211.1 709.2,210.6 744.0,209.2" class="s-val"/><circle cx="291.6" cy="224.7" r="5" class="best-dot"/><text x="283.6" y="246.7" text-anchor="end" class="ann">best: step 1750, val 1.385 (saved)</text></svg>
 <div class="legend"><span><span class="sw" style="background:var(--train)"></span>train loss (text it learns from)</span>
 <span><span class="sw" style="background:var(--val)"></span>val loss (text it never trains on)</span></div>
 <ul class="points">
-<li>Both lines fall together until <b>step 1750</b>, where the model is learning real patterns.</li>
-<li>After that, train keeps falling (1.09 → 0.59) but val rises (1.385 → 1.616). It's memorising.</li>
-<li>We kept the step-1750 checkpoint, not the last one. The last ~65% of training added nothing.</li>
+<li>Both lines fall together until <b>step 1750</b>, then train keeps falling (1.09 → 0.59) while val rises (1.385 → 1.616). It's memorising.</li>
+<li>We kept the step-1750 checkpoint, not the last one.</li>
+<li>Test 1.536 vs val 1.380: test is mostly <i>The Tempest</i> (62% of speeches by characters never seen in training), val mostly <i>The Taming of the Shrew</i> (7%). GPT small shows the same gap, so it comes from the data.</li>
 </ul>
 <details><summary>All checkpoints</summary>
 <table><tr><th class="n">Step</th><th class="n">Train</th><th class="n">Val</th><th class="n">Gap</th><th class="n">Val perplexity</th></tr><tr class=""><td class="n">0</td><td class="n">4.303</td><td class="n">4.301</td><td class="n">-0.002</td><td class="n">73.80</td></tr><tr class=""><td class="n">250</td><td class="n">1.931</td><td class="n">2.024</td><td class="n">+0.093</td><td class="n">7.57</td></tr><tr class=""><td class="n">500</td><td class="n">1.524</td><td class="n">1.687</td><td class="n">+0.163</td><td class="n">5.40</td></tr><tr class=""><td class="n">750</td><td class="n">1.345</td><td class="n">1.496</td><td class="n">+0.151</td><td class="n">4.46</td></tr><tr class=""><td class="n">1000</td><td class="n">1.259</td><td class="n">1.440</td><td class="n">+0.180</td><td class="n">4.22</td></tr><tr class=""><td class="n">1250</td><td class="n">1.195</td><td class="n">1.409</td><td class="n">+0.214</td><td class="n">4.09</td></tr><tr class=""><td class="n">1500</td><td class="n">1.143</td><td class="n">1.404</td><td class="n">+0.260</td><td class="n">4.07</td></tr><tr class="hi"><td class="n">1750</td><td class="n">1.091</td><td class="n">1.385</td><td class="n">+0.294</td><td class="n">3.99</td></tr><tr class=""><td class="n">2000</td><td class="n">1.045</td><td class="n">1.389</td><td class="n">+0.343</td><td class="n">4.01</td></tr><tr class=""><td class="n">2250</td><td class="n">0.995</td><td class="n">1.403</td><td class="n">+0.408</td><td class="n">4.07</td></tr><tr class=""><td class="n">2500</td><td class="n">0.942</td><td class="n">1.415</td><td class="n">+0.472</td><td class="n">4.12</td></tr><tr class=""><td class="n">2750</td><td class="n">0.891</td><td class="n">1.426</td><td class="n">+0.535</td><td class="n">4.16</td></tr><tr class=""><td class="n">3000</td><td class="n">0.845</td><td class="n">1.462</td><td class="n">+0.617</td><td class="n">4.31</td></tr><tr class=""><td class="n">3250</td><td class="n">0.796</td><td class="n">1.485</td><td class="n">+0.689</td><td class="n">4.41</td></tr><tr class=""><td class="n">3500</td><td class="n">0.755</td><td class="n">1.501</td><td class="n">+0.746</td><td class="n">4.48</td></tr><tr class=""><td class="n">3750</td><td class="n">0.712</td><td class="n">1.518</td><td class="n">+0.806</td><td class="n">4.56</td></tr><tr class=""><td class="n">4000</td><td class="n">0.680</td><td class="n">1.556</td><td class="n">+0.876</td><td class="n">4.74</td></tr><tr class=""><td class="n">4250</td><td class="n">0.651</td><td class="n">1.570</td><td class="n">+0.918</td><td class="n">4.80</td></tr><tr class=""><td class="n">4500</td><td class="n">0.630</td><td class="n">1.588</td><td class="n">+0.958</td><td class="n">4.89</td></tr><tr class=""><td class="n">4750</td><td class="n">0.610</td><td class="n">1.596</td><td class="n">+0.986</td><td class="n">4.93</td></tr><tr class=""><td class="n">5000</td><td class="n">0.593</td><td class="n">1.616</td><td class="n">+1.023</td><td class="n">5.03</td></tr></table>
 </details></div>
 
-<h2>2. Test score: the honest number</h2>
-<div class="panel">
-<table><tr><th>Split</th><th>What it is</th><th class="n">Loss</th><th class="n">Perplexity</th><th class="n">Characters</th></tr>
-<tr><td>Val</td><td>mostly <i>The Taming of the Shrew</i></td><td class="n">1.380</td><td class="n">3.98</td><td class="n">55,808</td></tr>
-<tr class="hi"><td>Test</td><td>mostly <i>The Tempest</i>, never seen</td><td class="n">1.536</td><td class="n">4.65</td><td class="n">55,552</td></tr></table>
-<ul class="points">
-<li>Every character is scored once, in order (no random batches), so the number is the same every run.</li>
-<li>Test is +0.156 worse because it's a different play: 62% of its speeches are by characters never seen in training (val: 7%).</li>
-<li>GPT small shows the same gap (1.571 → 1.688), so this comes from the data, not a bug.</li>
-<li>Perplexity 4.65 means that, on new text, the model is about as unsure as picking between ~5 equally likely characters (out of 65).</li>
-</ul></div>
-
-<h2>3. How we got here: all models</h2>
-<div class="panel"><svg viewBox="0 0 760 200" class="chart" role="img" aria-label="Validation loss by model"><text x="140" y="23.0" text-anchor="end" class="lab">Random guess</text><rect x="150" y="5" width="500.9" height="26" rx="4" class="bar"/><text x="658.9" y="23.0" class="val">4.174</text><text x="140" y="61.0" text-anchor="end" class="lab">Bigram</text><rect x="150" y="43" width="297.0" height="26" rx="4" class="bar"/><text x="455.0" y="61.0" class="val">2.475</text><text x="140" y="99.0" text-anchor="end" class="lab">1-head attention</text><rect x="150" y="81" width="279.6" height="26" rx="4" class="bar"/><text x="437.6" y="99.0" class="val">2.330</text><text x="140" y="137.0" text-anchor="end" class="lab">GPT small</text><rect x="150" y="119" width="187.7" height="26" rx="4" class="bar"/><text x="345.7" y="137.0" class="val">1.564</text><text x="140" y="175.0" text-anchor="end" class="lab">GPT full (model 4)</text><rect x="150" y="157" width="166.1" height="26" rx="4" class="bar-hi"/><text x="324.1" y="175.0" class="val">1.385</text></svg>
-<p class="sub" style="margin:6px 0 12px">Best val loss, where lower is better.</p>
-<table><tr><th>Model</th><th>What it can do</th><th class="n">Parameters</th><th class="n">Val loss</th><th class="n">Perplexity</th><th class="n">Test loss</th><th class="n">Time</th></tr><tr class=""><td>Random guess</td><td>Picks any of 65 characters</td><td class="n">0</td><td class="n">4.174</td><td class="n">65.00</td><td class="n">-</td><td class="n">-</td></tr><tr class=""><td>Bigram</td><td>Sees only the current character</td><td class="n">4,225</td><td class="n">2.475</td><td class="n">11.88</td><td class="n">-</td><td class="n">4 s</td></tr><tr class=""><td>1-head attention</td><td>Looks back 32 characters</td><td class="n">22,721</td><td class="n">2.330</td><td class="n">10.28</td><td class="n">-</td><td class="n">12 s</td></tr><tr class=""><td>GPT small</td><td>4 layers, looks back 64</td><td class="n">809,856</td><td class="n">1.564</td><td class="n">4.78</td><td class="n">1.688</td><td class="n">69 s</td></tr><tr class="hi"><td>GPT full (model 4)</td><td>6 layers, looks back 256</td><td class="n">10,770,816</td><td class="n">1.385</td><td class="n">3.99</td><td class="n">1.536</td><td class="n">70 min</td></tr></table>
-</div>
-
-<h2>4. Text while it trained (model 4)</h2>
-<p class="sub">Same start every time, written at each checkpoint during training.</p>
+<h3 style="margin:24px 0 8px">Text while it trained</h3>
 <div class="cards"><div class="card"><div class="card-h">Step 0 (random start)</div><pre>fhR$snp$;M3bB3FcxfEECnIhjf.LV
 dbb??t3BNN-qIwRFc:Im&#x27;T,B-xduqZgjg-SskjZPPWBhoVdddevgrWN$v,RdAg;;OXD3FBlxqVjc$H-DdCHIiU!Q!gkdPukQu&#x27;d3 GOugQzjMOqWmSJWWA!NbrKnKqDHfqCOOv.P$WKmNDL$puSii:yfQn&amp;&amp;e&#x27;EnBykhlkc?JDS;yvWdHI:H
 QAkatdNv
@@ -131,7 +174,7 @@ As they are had provided to true friends,
 As one the wag of death hath cried &#x27;God save true from the heaven!&#x27;
 O, Norfolk, for I see, hate up my</pre></div></div>
 
-<h2>5. Text at different temperatures (best model)</h2>
+<h3 style="margin:24px 0 8px">Different temperatures</h3>
 <p class="sub">Start: "ROMEO:". Same seed, only the setting changes.</p>
 <div class="cards"><div class="card"><div class="card-h">Temperature 0.5</div><div class="card-sub">Safe: clean but repetitive</div><pre>ROMEO:
 What news?
@@ -188,13 +231,12 @@ Ere I guere enter&#x27;d and yield,
 Dinnicationed frame me drab.
 To hWeepingly I bharding I am </pre></div></div>
 
-<h2>6. Setup</h2>
+<h2>5. Setup</h2>
 <div class="panel"><ul class="points">
-<li><b>Data:</b> Tiny Shakespeare (1.1M characters), split by position into 90% train / 5% val / 5% test.</li>
-<li><b>Tokenizer:</b> 65 characters, built from the train text only.</li>
-<li><b>Model:</b> 6 layers, 6 heads, width 384, context 256 characters, dropout 0.2, GPT-2 design.</li>
-<li><b>Training:</b> 5000 steps, batch 64, AdamW, learning rate 0.001 with warm-up then cosine to 0.0001, weight decay 0.1, gradient clip 1.0.</li>
-<li><b>Next ideas:</b> a BPE tokenizer (word pieces), more data (TinyStories), stopping earlier.</li>
+<li><b>Model design (all GPTs):</b> GPT-2 style: token + position embeddings, pre-LayerNorm blocks with multi-head causal attention and a GELU feed-forward, weight tying, AdamW with warm-up then cosine learning rate, gradient clip 1.0, best-checkpoint saving.</li>
+<li><b>Models 1-5:</b> Tiny Shakespeare (1.1M characters), split by position into 90% train / 5% val / 5% test.</li>
+<li><b>Model 6:</b> TinyStories V2 (2.7M stories, 2.2 GB). Train = the official train file; val and test = the two halves of the official validation file (0 exact duplicates with train). Our own byte-level BPE with 4,096 tokens, learned from a 40 MB train sample, 6 layers, 6 heads, width 384, context 256 tokens, dropout 0.0, 15,000 steps of batch 64.</li>
+<li><b>Next:</b> a grammar test to measure English across models, then a bigger model on real-world English (FineWeb-Edu).</li>
 </ul></div>
 
 </main></body></html>

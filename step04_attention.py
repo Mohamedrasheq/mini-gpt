@@ -7,7 +7,7 @@ New compared with the bigram:
   - one attention head : each character looks back at earlier characters and mixes in what's useful
   - output layer       : turns the mixed result into 65 scores for the next character
 
-Run: .venv/bin/python attention.py
+Run: .venv/bin/python step04_attention.py
 """
 
 import torch

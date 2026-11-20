@@ -11,3 +11,6 @@ __pycache__/
 
 # Encoded data (re-create with tokenizer.py and bpe_tokenizer.py)
 data/*.bin
+
+# TinyStories (step 8): large, CDLA-Sharing licence; re-download with step08_tinystories_data.py
+data/tinystories/
