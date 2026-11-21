@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.0.0 — 2026-11-21
+
+The repo now holds only model 7, with plain file names. The step-by-step history (models 1-6,
+steps 1-10) stays in the [v1.1.0 release](https://github.com/Mohamedrasheq/mini-gpt/tree/v1.1.0).
+
+### Changed
+
+- Files renamed: `tokenizer.py`, `prepare_data.py`, `model.py`, `train.py`, `evaluate.py`,
+  `chat.py`, `train_colab.ipynb`. The tokenizer code from steps 7, 8 and 10a is merged into
+  `tokenizer.py`; the BLiMP and HellaSwag downloads are part of `evaluate.py`.
+- Results live in `results/model7/` and `results/benchmarks/`; the tokenizer in `data/tokenizer_8k.json`.
+
+### Added
+
+- GPT-2 124M as a reference in `evaluate.py` (`--model gpt2`), scored by the same script, and a
+  Model 7 vs GPT-2 table in the README.
+
+### Removed
+
+- Steps 1-9 and 10 (check, tokenizer) as separate files, Tiny Shakespeare, the models 1-6 results
+  and the HTML report. All of them are in v1.1.0.
+
 ## 1.1.0 — 2026-11-21
 
 Model 7: a 30M-parameter GPT trained on 2 billion tokens of English, and a test suite to measure it.

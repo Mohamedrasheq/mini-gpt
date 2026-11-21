@@ -1,0 +1,44 @@
+{
+  "model": "gpt2",
+  "parameters": 124439808,
+  "tests": {
+    "tinystories": {
+      "loss_per_char": 0.6221,
+      "chars_per_token": 4.07,
+      "items": 11268114
+    },
+    "fineweb_edu": {
+      "loss_per_char": 0.7191,
+      "chars_per_token": 4.59,
+      "items": 23629792
+    },
+    "blimp": {
+      "acc": 82.51,
+      "items": 67000
+    },
+    "hellaswag": {
+      "acc": 28.56,
+      "acc_norm": 29.89,
+      "items": 10042
+    },
+    "lambada": {
+      "acc": 33.69,
+      "perplexity": 16.28,
+      "items": 5153
+    },
+    "piqa": {
+      "acc": 63.06,
+      "acc_norm": 62.51,
+      "items": 1838
+    },
+    "arc_easy": {
+      "acc": 43.9,
+      "acc_norm": 40.49,
+      "items": 2376
+    },
+    "winogrande": {
+      "acc": 50.43,
+      "items": 1267
+    }
+  }
+}

@@ -1,5 +1,5 @@
 """
-Step 10: the model. Same idea as step 5's GPT, with three changes most recent small models use:
+The model: a GPT (decoder-only transformer) with the three parts most recent small models use:
 
   RoPE     positions are added by ROTATING each head's query/key vectors (no position table).
            Works better than a learned position table and adds no parameters.

@@ -1,5 +1,5 @@
 """
-Step 9c: run the same 8 tests on our models and compare them.
+Test a model on 8 standard tests, and compare models side by side.
 
 Same code, same data, same scoring for every model, so the numbers are fair to compare.
 Every test works the same way: the model writes nothing, it only scores text.
@@ -15,14 +15,16 @@ Every test works the same way: the model writes nothing, it only scores text.
   arc_easy      school science questions                3-5      ~25%    log-prob per character
   winogrande    who does "she" / "it" refer to          2        50%     log-prob of the rest of the sentence
 
-Loss is compared per CHARACTER, not per token: the models cut text into different tokens.
-The question prompts follow lm-evaluation-harness, the tool most model releases use.
-Datasets come from Hugging Face (test only, never trained on).
+Loss is compared per CHARACTER, not per token: models cut text into different tokens.
+All tests are zero-shot; the prompts follow lm-evaluation-harness. Other tools can give slightly
+different numbers for the same model because of prompt formatting.
+Test data comes from GitHub / Hugging Face and is never used for training.
+GPT-2 124M (OpenAI, 2019) is scored the same way as a reference; it needs: pip install transformers
 
 Run:
-  .venv/bin/python step09c_benchmarks.py --model stories     # model 6 (step 8)
-  .venv/bin/python step09c_benchmarks.py --model fineweb     # model 7 (step 10)
-  .venv/bin/python step09c_benchmarks.py --table             # side-by-side table
+  .venv/bin/python evaluate.py --model model7     # our model (results/model7/best.pt)
+  .venv/bin/python evaluate.py --model gpt2       # GPT-2 124M
+  .venv/bin/python evaluate.py --table            # side-by-side table
   add --quick to try only 200 items per test (nothing saved); --only <tests> to run some tests
 Saves results/benchmarks/<model>.json and results/benchmarks/compare.md
 """
@@ -38,20 +40,23 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from common import TOKENIZERS, device
-from step06_evaluate import load_model
-from step09_blimp import DIR as BLIMP_DIR, download as blimp_download
-from step09b_hellaswag import download as hellaswag_download
+from prepare_data import FW_URL, HELDOUT_DOCS, HELDOUT_FILE, ST_URL, fetch, parquet_docs, stories
+from tokenizer import EOT
+
+device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 DATA = Path("data/benchmarks")
 OUT = Path("results/benchmarks")
 ROWS_API = "https://datasets-server.huggingface.co/rows"
 SOURCES = {                                   # name: (Hugging Face dataset, config, split)
+    "hellaswag": ("Rowan/hellaswag", "default", "validation"),
     "lambada": ("EleutherAI/lambada_openai", "default", "test"),
     "piqa": ("baber/piqa", "default", "validation"),
     "arc_easy": ("allenai/ai2_arc", "ARC-Easy", "test"),
     "winogrande": ("allenai/winogrande", "winogrande_xl", "validation"),
 }
+BLIMP_API = "https://api.github.com/repos/alexwarstadt/blimp/contents/data"
+BLIMP_RAW = "https://raw.githubusercontent.com/alexwarstadt/blimp/master/data/"
 TOKEN_BUDGET = 2 ** 27                        # tokens x vocabulary per batch (keeps memory low)
 
 
@@ -90,6 +95,19 @@ def hf_rows(name):
     return rows
 
 
+def blimp_files():
+    """The 67 BLiMP files (1,000 sentence pairs each), downloaded once from GitHub."""
+    folder = DATA / "blimp"
+    folder.mkdir(parents=True, exist_ok=True)
+    if len(list(folder.glob("*.jsonl"))) < 67:
+        listing = subprocess.run(["curl", "-s", "-H", "User-Agent: mini-gpt", BLIMP_API],
+                                 capture_output=True, text=True, check=True).stdout
+        for name in sorted(x["name"] for x in json.loads(listing) if x["name"].endswith(".jsonl")):
+            if not (folder / name).exists():
+                subprocess.run(["curl", "-s", "--fail", "-o", str(folder / name), BLIMP_RAW + name], check=True)
+    return sorted(folder.glob("*.jsonl"))
+
+
 # ---------------------------------------------------------------- models
 
 class LM:
@@ -97,19 +115,21 @@ class LM:
 
     def __init__(self, name, ckpt=None, tokenizer=None):
         self.name = name
-        if name == "fineweb":                 # step 10: ~30M model, 8K tokenizer
-            from step08_tinystories_tokenizer import StoryTokenizer
-            from step10_model import GPT, Config
-            ck = torch.load(ckpt or "results/gpt_fineweb/best.pt", map_location=device, weights_only=True)
+        if name == "gpt2":                    # GPT-2 124M, for reference
+            from transformers import GPT2LMHeadModel, GPT2TokenizerFast
+            tok = GPT2TokenizerFast.from_pretrained("gpt2")
+            tok.model_max_length = 10 ** 9    # we cut long text into windows ourselves
+            net = GPT2LMHeadModel.from_pretrained("gpt2").to(device).eval()
+            self.encode, self.start, self.max_len = tok.encode, tok.eos_token_id, 1024
+            self.vocab, self.forward = len(tok), lambda x: net(x).logits
+        else:                                 # our model (model.py + tokenizer.py)
+            from model import GPT, Config
+            from tokenizer import Tokenizer
+            ck = torch.load(ckpt or f"results/{name}/best.pt", map_location=device, weights_only=True)
             net = GPT(Config(**ck["config"])).to(device).eval()
             net.load_state_dict(ck["model"])
-            tok = StoryTokenizer.load(tokenizer or "data/fineweb/tokenizer_8k.json")
+            tok = Tokenizer.load(tokenizer or "data/tokenizer_8k.json")
             self.encode, self.start, self.max_len = tok.encode, tok.eot, net.c.block_size
-            self.vocab, self.forward = tok.vocab_size, lambda x: net(x)[0]
-        else:
-            net, c = load_model(name)
-            tok = TOKENIZERS[c.tokenizer][0]
-            self.encode, self.start, self.max_len = tok.encode, tok.eot, c.block_size
             self.vocab, self.forward = tok.vocab_size, lambda x: net(x)[0]
         self.params = sum(p.numel() for p in net.parameters())
 
@@ -174,25 +194,22 @@ def multiple_choice(lm, questions):
 # ---------------------------------------------------------------- the 7 tests
 
 def test_tinystories(lm, quick):
-    """Loss per character on the TinyStories test split, in windows of the model's full context."""
-    text = Path("data/tinystories/test.txt").read_text(encoding="utf-8")
+    """Loss per character on the TinyStories test split (second half of the official valid file)."""
+    raw = Path("data/fineweb/raw")
+    raw.mkdir(parents=True, exist_ok=True)
+    valid = stories(fetch(ST_URL.format("valid"), raw / "st_valid.txt").read_text(encoding="utf-8"))
+    text = "".join(s + f"\n{EOT}\n" for s in valid[len(valid) // 2:])
     if quick:
         text = text[:200_000]
-    if lm.name == "stories" and not quick:    # same tokens as test.txt, already encoded in step 8b
-        ids = np.fromfile("data/tinystories/test.bin", dtype=np.uint16).astype(np.int64).tolist()
-    else:
-        ids = lm.encode(text)
-    return loss_per_char(lm, ids, len(text))
+    return loss_per_char(lm, lm.encode(text), len(text))
 
 
 def test_fineweb_edu(lm, quick):
     """Loss per character on 5,000 held-out FineWeb-Edu documents (file 013, never trained on)."""
-    from step08_tinystories_tokenizer import EOT
-    from step10b_data import FW_URL, HELDOUT_DOCS, HELDOUT_FILE, fetch, parquet_docs
     raw = Path("data/fineweb/raw")
     raw.mkdir(parents=True, exist_ok=True)
     path = fetch(FW_URL.format(HELDOUT_FILE), raw / f"fw_{HELDOUT_FILE}.parquet")
-    it = parquet_docs(path, skip=HELDOUT_DOCS)            # the second 5,000 = step 10's test documents
+    it = parquet_docs(path, skip=HELDOUT_DOCS)            # the second 5,000 = the test documents
     docs = [next(it) for _ in range(200 if quick else HELDOUT_DOCS)]
     ids = [i for d in docs for i in lm.encode(d + EOT)]
     return loss_per_char(lm, ids, sum(len(d) for d in docs))
@@ -214,8 +231,7 @@ def loss_per_char(lm, ids, n_chars):
 
 
 def test_blimp(lm, quick):
-    blimp_download()
-    files = sorted(BLIMP_DIR.glob("*.jsonl"))
+    files = blimp_files()
     rows = [json.loads(line) for f in files for line in f.read_text().splitlines() if line.strip()]
     if quick:
         rows = rows[::len(rows) // 200][:200]
@@ -226,9 +242,7 @@ def test_blimp(lm, quick):
 
 
 def test_hellaswag(lm, quick):
-    rows = [json.loads(line) for line in hellaswag_download().read_text().splitlines() if line.strip()]
-    if quick:
-        rows = rows[:200]
+    rows = hf_rows("hellaswag")[:200 if quick else None]
     return multiple_choice(lm, [(r["ctx"], [" " + e for e in r["endings"]], int(r["label"])) for r in rows])
 
 
@@ -275,7 +289,7 @@ HEADLINE = [("tinystories", "loss_per_char", None, False), ("fineweb_edu", "loss
             ("arc_easy", "acc_norm", 25, True), ("winogrande", "acc", 50, True)]
 
 
-NAMES = {"stories": "Model 6", "fineweb": "Model 7"}
+NAMES = {"model7": "Model 7", "gpt2": "GPT-2"}
 
 
 def table():
@@ -300,12 +314,12 @@ def table():
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--model", default="stories", help="stories (model 6) or fineweb (model 7)")
+    p.add_argument("--model", default="model7", help="model7 (ours, results/model7/best.pt) or gpt2 (GPT-2 124M)")
     p.add_argument("--quick", action="store_true")
     p.add_argument("--table", action="store_true")
     p.add_argument("--only", nargs="*", help="run only these tests (merged into saved results)")
-    p.add_argument("--ckpt", help="fineweb only: checkpoint path (default results/gpt_fineweb/best.pt)")
-    p.add_argument("--tokenizer", help="fineweb only: tokenizer path (default data/fineweb/tokenizer_8k.json)")
+    p.add_argument("--ckpt", help="our model: checkpoint path (default results/<model>/best.pt)")
+    p.add_argument("--tokenizer", help="our model: tokenizer path (default data/tokenizer_8k.json)")
     p.add_argument("--save_as", help="results name (default: the model name)")
     args = p.parse_args()
     if args.table:
