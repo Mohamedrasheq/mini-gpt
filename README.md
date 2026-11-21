@@ -1,57 +1,66 @@
 # mini-gpt
 
-**Version 1.0.0** · [Changelog](CHANGELOG.md) · MIT license
+**Version 1.1.0** · [Changelog](CHANGELOG.md) · MIT license
 
-Small GPT language models built from scratch in plain PyTorch, one step at a time: first on
-Tiny Shakespeare, then on TinyStories. Everything trains on a single consumer GPU.
+Small GPT language models built from scratch in plain PyTorch, one step at a time: from a
+character bigram on Shakespeare to a 30M-parameter model trained on 2 billion tokens of English.
 
 No pre-trained weights and no model libraries: every part (tokenizers, attention, GPT block,
 training loop, evaluation) is written here and trained from random numbers.
 
 ```text
-Once upon a time, there was a smooth stone. It stood in a row near a big tree. The stone wanted to
-be just like the other stones.
-One day, a little girl found the smooth stone. She saw the shiny stone and said, "Wow! This stone is
-so pretty. I will buy it for you." The girl took the stone home. [...] The stone was happy and so was
-the girl. They became friends and lived happily ever after.
+The water cycle is one of the main advantages of the environment. It helps in the development of a
+good water supply for a population. With this, a river is formed for a variety of different forms
+of life.
 ```
-*Written by model 6 (12.3M parameters, trained from scratch on TinyStories).*
+*Written by model 7 (29.9M parameters). The English is fluent; the facts are not reliable, as
+expected from a model this small.*
 
-## Results
+## Model 7 (latest)
 
-### Shakespeare (models 1-5)
+| | |
+|---|---|
+| Parameters | 29,893,120 (8 layers, 512 wide, 8 heads, 512-token context) |
+| Design | GPT with RoPE, SwiGLU and RMSNorm, weight tying, no biases |
+| Tokenizer | our own byte-level BPE, 8,192 tokens |
+| Training data | 2.0B tokens: 90% FineWeb-Edu + 10% TinyStories |
+| Training | 7,630 steps × 262,144 tokens, AdamW, warm-up + cosine, bf16 mixed precision |
 
-All five read the same 1 MB of text and are scored on the same held-out data. Loss is per character
-(lower is better). Perplexity = e^loss, roughly "how many characters the model is choosing between".
+### Test scores
 
-| Model | Parameters | Val loss | Perplexity | Test loss |
-|---|---:|---:|---:|---:|
-| Random guess | 0 | 4.174 | 65.0 | - |
-| 1. Bigram | 4,225 | 2.478 | 11.9 | - |
-| 2. 1-head attention | 22,721 | 2.330 | 10.3 | - |
-| 3. GPT small | 809,856 | 1.564 | 4.78 | 1.688 |
-| **4. GPT full** (characters) | **10,770,816** | **1.385** | **3.99** | **1.536** |
-| 5. GPT full BPE (1,024 word pieces) | 11,139,072 | 1.453 | 4.28 | 1.628 |
+All tests run with the same script (`step09c_benchmarks.py`), on data the model never trained on.
+Multiple-choice tests are scored zero-shot: the model scores each answer, the highest wins.
 
-- GPT full uses the same settings as nanoGPT's Shakespeare character model (reference val ≈ 1.47).
-- It reached its best val at step 1,750 of 5,000 and then overfit. The best checkpoint is the one kept.
-- Test is mostly *The Tempest* (62% of speeches by characters never seen in training), so test loss
-  is higher than val loss (*The Taming of the Shrew*).
-- **BPE lost on this data.** In word pieces, 1 MB of text is only 411K training tokens; the model
-  overfit by step 750. Its loss is converted to per character to compare fairly.
+| Test | What it checks | Random | Model 7 |
+|---|---|---:|---:|
+| BLiMP | grammar: pick the correct sentence of a pair | 50% | **76.1%** |
+| ARC-Easy | school science questions (acc_norm) | 25% | **39.9%** |
+| PIQA | everyday physical common sense (acc_norm) | 50% | **58.2%** |
+| HellaSwag | pick the sensible ending of a scene (acc_norm) | 25% | **27.9%** |
+| LAMBADA | predict the last word of a passage | 0% | **22.1%** |
+| WinoGrande | who a pronoun refers to | 50% | 50.7% |
+| FineWeb-Edu test loss | per character, lower is better | - | **0.790** |
+| TinyStories test loss | per character, lower is better | - | **0.397** |
 
-### TinyStories (model 6)
+WinoGrande stays at chance: this test needs much larger models.
 
-| Model | Parameters | Tokens seen | Val loss | Test loss | Test perplexity |
-|---|---:|---:|---:|---:|---:|
-| **6. GPT stories** | **12,318,720** | 246M | **1.366** | **1.364** | **3.91** |
+## How it grew
 
-- Loss is per token (4,096-token BPE), so it can't be compared with the Shakespeare table.
-- Train and val stayed together the whole run (no overfitting), and test matches val (gap -0.003).
-- With word pieces and 2,000× more data, the same design went from made-up words to clear English.
+| # | Model | Data | Parameters | Key result |
+|---|---|---|---:|---|
+| 1 | Bigram | Shakespeare (1 MB) | 4,225 | val loss 2.478 per character |
+| 2 | 1-head attention | Shakespeare | 22,721 | val loss 2.330 |
+| 3 | GPT small | Shakespeare | 809,856 | val loss 1.564 |
+| 4 | GPT full (characters) | Shakespeare | 10,770,816 | val loss 1.385, test 1.536 |
+| 5 | GPT full (1,024-piece BPE) | Shakespeare | 11,139,072 | test 1.628 per character (too little data for BPE) |
+| 6 | GPT stories | TinyStories (246M tokens) | 12,318,720 | test 1.364 per token, BLiMP 60.4% |
+| **7** | **GPT FineWeb** | **FineWeb-Edu + TinyStories (2.0B tokens)** | **29,893,120** | **BLiMP 76.1%** |
 
-Open `results/report.html` for loss curves, text written during training and samples at
-different temperatures.
+Model 6 writes clean children's stories but knows little else. Model 7 changed three things at
+once (richer data, a bigger tokenizer and a larger, modern design) and improved on every
+general-English test. Model 6 vs 7 on all tests: [`results/benchmarks/compare.md`](results/benchmarks/compare.md).
+
+`results/report.html` has loss curves and samples for models 1-6.
 
 ## Steps
 
@@ -60,20 +69,30 @@ Earlier steps are kept on purpose: each one is a smaller model that the next ste
 
 | Step | File | What it does | Model |
 |---|---|---|---|
-| 1 | `step01_prepare_data.py` | Splits Shakespeare into train / val / test (90 / 5 / 5) by position, cut at blank lines | - |
+| 1 | `step01_prepare_data.py` | Splits Shakespeare into train / val / test (90 / 5 / 5) by position | - |
 | 2 | `step02_char_tokenizer.py` | Character tokenizer: 65 characters, built from train only | - |
 | 3 | `step03_bigram.py` | Baseline: guesses the next character from the current one only | 1 |
 | 4 | `step04_attention.py` | One self-attention head that looks back 32 characters | 2 |
-| 5 | `step05_gpt.py` | The GPT (GPT-2 design): multi-head causal attention, feed-forward, pre-LayerNorm, residuals, weight tying, AdamW, warm-up + cosine schedule, best-checkpoint saving, early stopping | 3, 4, 5, 6 |
+| 5 | `step05_gpt.py` | The GPT (GPT-2 style): multi-head causal attention, feed-forward, pre-LayerNorm, residuals, weight tying, AdamW, warm-up + cosine, early stopping | 3-6 |
 | 6 | `step06_evaluate.py` | Scores a trained GPT on val and test (every token once) | - |
-| 6 | `step06_chat.py` | Type a start, the model continues it (temperature, top-k) | - |
+| 6 | `step06_chat.py` | Type a start, the model continues it (models 1-6) | - |
 | 6 | `step06_report.py` | Builds `results/report.html` | - |
-| 7 | `step07_bpe_tokenizer.py` | Byte-level BPE tokenizer written from scratch (1,024 pieces for Shakespeare) | 5 |
+| 7 | `step07_bpe_tokenizer.py` | Byte-level BPE tokenizer written from scratch | 5 |
 | 8 | `step08_tinystories_data.py` | Downloads TinyStories V2 and splits it into train / val / test | - |
-| 8 | `step08_tinystories_tokenizer.py` | Learns a 4,096-token BPE (with an end-of-story token) and encodes all 2.2 GB | 6 |
+| 8 | `step08_tinystories_tokenizer.py` | 4,096-token BPE with an end-of-story token; encodes all 2.2 GB | 6 |
+| 9 | `step09_blimp.py` | Grammar test: 67,000 BLiMP sentence pairs, with a breakdown by grammar area | - |
+| 9 | `step09b_hellaswag.py` | Common-sense test: 10,042 HellaSwag questions | - |
+| 9 | `step09c_benchmarks.py` | All 8 tests for any of our models, and a side-by-side table | - |
+| 10 | `step10_fineweb_check.py` | Measures how well each tokenizer fits FineWeb-Edu (why we need a new one) | - |
+| 10 | `step10a_tokenizer.py` | 8,192-token BPE learned from the FineWeb-Edu + TinyStories mix | 7 |
+| 10 | `step10b_data.py` | Downloads and encodes 1.8B FineWeb-Edu + 0.2B TinyStories tokens | 7 |
+| 10 | `step10_model.py` | The model-7 design: RoPE, SwiGLU, RMSNorm | 7 |
+| 10 | `step10_train.py` | Training for one GPU: bf16, gradient accumulation, data mix, resumable checkpoints | 7 |
+| 10 | `step10_colab.ipynb` | Runs steps 10b and 10 on a Colab GPU | 7 |
+| 10 | `step10_chat.py` | Type a start, model 7 continues it | 7 |
 
-`common.py` is not a step: it holds the helpers every step from 4 on shares (data, batches, loss
-estimate, text generation).
+`common.py` is not a step: it holds the helpers steps 4-6 share (data, batches, loss estimate,
+text generation).
 
 ## Run it
 
@@ -81,48 +100,69 @@ estimate, text generation).
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt
 
-# Shakespeare
-.venv/bin/python step01_prepare_data.py           # split the text
-.venv/bin/python step02_char_tokenizer.py         # characters -> numbers
-.venv/bin/python step03_bigram.py                 # seconds
-.venv/bin/python step04_attention.py              # seconds
-.venv/bin/python step05_gpt.py small              # about a minute
-.venv/bin/python step05_gpt.py full               # add --time first to estimate the run on your hardware
-.venv/bin/python step06_evaluate.py full          # val and test score
-.venv/bin/python step06_chat.py --temperature 0.8 --top_k 10   # type a start, e.g. ROMEO:
-.venv/bin/python step07_bpe_tokenizer.py          # learn BPE pieces, encode the text
-.venv/bin/python step05_gpt.py full_bpe           # the GPT again, reading BPE pieces
+# Shakespeare (models 1-5)
+.venv/bin/python step01_prepare_data.py
+.venv/bin/python step02_char_tokenizer.py
+.venv/bin/python step03_bigram.py
+.venv/bin/python step04_attention.py
+.venv/bin/python step05_gpt.py small
+.venv/bin/python step05_gpt.py full               # --time estimates the run on your hardware first
+.venv/bin/python step06_evaluate.py full
+.venv/bin/python step06_chat.py --temperature 0.8 --top_k 10
+.venv/bin/python step07_bpe_tokenizer.py
+.venv/bin/python step05_gpt.py full_bpe
 
-# TinyStories (~4 GB of disk)
-.venv/bin/python step08_tinystories_data.py       # download (2.2 GB) and split
-.venv/bin/python step08_tinystories_tokenizer.py  # learn the 4,096-token BPE, encode everything
-.venv/bin/python step05_gpt.py stories            # the longest run; --time estimates it first
+# TinyStories (model 6, ~4 GB of disk)
+.venv/bin/python step08_tinystories_data.py
+.venv/bin/python step08_tinystories_tokenizer.py
+.venv/bin/python step05_gpt.py stories
 .venv/bin/python step06_evaluate.py stories
 .venv/bin/python step06_chat.py --size stories --temperature 0.8 --top_k 50
 
-.venv/bin/python step06_report.py                 # results/report.html
+# Tests (step 9)
+.venv/bin/python step09c_benchmarks.py --model stories   # add --quick for a small check
+.venv/bin/python step09c_benchmarks.py --table
+
+# FineWeb-Edu (model 7): best on a cloud GPU, see step10_colab.ipynb
+.venv/bin/python step10_fineweb_check.py
+.venv/bin/python step10a_tokenizer.py
+.venv/bin/python step10b_data.py                         # ~7 GB download, ~4 GB of token files
+.venv/bin/python step10_train.py --speed_test            # estimates the full run first
+.venv/bin/python step10_train.py
+.venv/bin/python step09c_benchmarks.py --model fineweb
+.venv/bin/python step10_chat.py "The water cycle is"
 ```
 
-It picks the best device it finds: an NVIDIA GPU (CUDA), an Apple GPU (MPS) or the CPU.
-Tested with Python 3.14 and PyTorch 2.15.
+The code picks the best device it finds: an NVIDIA GPU (CUDA), an Apple GPU (MPS) or the CPU.
+Tested with Python 3.14 and PyTorch 2.15. Trained weights are not in the repo.
 
 ## Next
 
-- A grammar test (BLiMP-style sentence pairs) to measure English the same way across models.
-- A bigger model on real-world English (FineWeb-Edu) on a cloud GPU.
-- Modern parts (RMSNorm, RoPE, SwiGLU), one at a time.
+- Train model 7's design on more tokens (4-6B), then a slightly larger model.
+- Publish the trained weights with a model card.
 
 ## Data
 
 - [Tiny Shakespeare](https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt)
-  (about 1.1M characters of Shakespeare's plays, public domain), included as `data/shakespeare.txt`.
-- [TinyStories](https://huggingface.co/datasets/roneneldan/TinyStories) V2 (Eldan & Li, 2023; CDLA-Sharing-1.0),
-  not included: `step08_tinystories_data.py` downloads it.
+  (public domain), included as `data/shakespeare.txt`.
+- [TinyStories](https://huggingface.co/datasets/roneneldan/TinyStories) V2 (Eldan & Li, 2023; CDLA-Sharing-1.0).
+- [FineWeb-Edu](https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu), `sample-10BT` (Hugging Face, 2024; ODC-By 1.0).
+- Tests: [BLiMP](https://github.com/alexwarstadt/blimp) (Warstadt et al., 2020),
+  [HellaSwag](https://huggingface.co/datasets/Rowan/hellaswag) (Zellers et al., 2019),
+  [LAMBADA](https://huggingface.co/datasets/EleutherAI/lambada_openai) (Paperno et al., 2016),
+  [PIQA](https://huggingface.co/datasets/baber/piqa) (Bisk et al., 2020),
+  [ARC](https://huggingface.co/datasets/allenai/ai2_arc) (Clark et al., 2018),
+  [WinoGrande](https://huggingface.co/datasets/allenai/winogrande) (Sakaguchi et al., 2020).
+
+Only Tiny Shakespeare is included; the scripts download everything else. Test sets are used for
+testing only, never for training or tuning.
 
 ## Credits
 
-The model design follows GPT-2 (Radford et al., 2019) and the training setup follows Andrej
-Karpathy's nanoGPT, minbpe and llama2.c work. The code here is written independently.
+The model design follows GPT-2 (Radford et al., 2019) and, for model 7, RoPE (Su et al., 2021),
+SwiGLU (Shazeer, 2020) and RMSNorm (Zhang & Sennrich, 2019). The training setup follows Andrej
+Karpathy's nanoGPT, minbpe, llama2.c and build-nanogpt work, and the test prompts follow
+EleutherAI's lm-evaluation-harness. The code here is written independently.
 
 ## License
 

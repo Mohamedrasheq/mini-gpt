@@ -1,13 +1,13 @@
 Learning joins from a 40 MB sample of train (spread across the file)...
   16,151 unique chunks in the sample
-  1,280 pieces learned (0s)
-  2,304 pieces learned (1s)
-  3,328 pieces learned (1s)
-  4,352 pieces learned (2s)
-  5,376 pieces learned (2s)
-  6,400 pieces learned (2s)
-  7,424 pieces learned (3s)
-  done in 4s
+  1,280 pieces learned
+  2,304 pieces learned
+  3,328 pieces learned
+  4,352 pieces learned
+  5,376 pieces learned
+  6,400 pieces learned
+  7,424 pieces learned
+  done
 
 Which vocabulary size?  (chars per token on val; 'rare' = seen < 50 times in 10 MB of train)
    size | chars per token | rare pieces
@@ -23,19 +23,19 @@ Examples:
 Round trip OK
 Saved -> data/tinystories/bpe_merges.json
 
-Encoding all splits with 10 CPU workers (train takes the longest)...
-  val  :    2,809,031 tokens | 3.99 chars per token | 0.0 min -> data/tinystories/val.bin
-  test :    2,825,157 tokens | 3.99 chars per token | 0.0 min -> data/tinystories/test.bin
-    9% | 52,558,184 tokens | about 0 min left
-    19% | 105,120,428 tokens | about 0 min left
-    28% | 157,678,587 tokens | about 0 min left
-    38% | 210,223,300 tokens | about 0 min left
-    47% | 262,772,229 tokens | about 0 min left
-    57% | 315,323,389 tokens | about 0 min left
-    66% | 367,881,236 tokens | about 0 min left
-    75% | 420,435,044 tokens | about 0 min left
-    85% | 472,989,888 tokens | about 0 min left
-    94% | 525,543,129 tokens | about 0 min left
-  train:  557,993,375 tokens | 0.3 min -> data/tinystories/train.bin
+Encoding all splits on all CPU cores (train takes the longest)...
+  val  :    2,809,031 tokens | 3.99 chars per token -> data/tinystories/val.bin
+  test :    2,825,157 tokens | 3.99 chars per token -> data/tinystories/test.bin
+    9% | 52,558,184 tokens
+    19% | 105,120,428 tokens
+    28% | 157,678,587 tokens
+    38% | 210,223,300 tokens
+    47% | 262,772,229 tokens
+    57% | 315,323,389 tokens
+    66% | 367,881,236 tokens
+    75% | 420,435,044 tokens
+    85% | 472,989,888 tokens
+    94% | 525,543,129 tokens
+  train:  557,993,375 tokens -> data/tinystories/train.bin
 
 Done.
