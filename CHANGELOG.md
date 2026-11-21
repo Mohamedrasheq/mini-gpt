@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.1.0 — 2026-11-21
+
+Model 7: a 30M-parameter GPT trained on 2 billion tokens of English, and a test suite to measure it.
+
+### Models
+
+- **Model 7 (step 10):** 29.9M parameters (8 layers, 512 wide, 512-token context) with RoPE, SwiGLU
+  and RMSNorm, an 8,192-token BPE, trained on 1.8B FineWeb-Edu + 0.2B TinyStories tokens.
+  BLiMP 76.1%, ARC-Easy 39.9%, PIQA 58.2%, HellaSwag 27.9%, LAMBADA 22.1%;
+  FineWeb-Edu test loss 0.790 per character. Better than model 6 on every general-English test.
+
+### Code
+
+- Step 9: BLiMP grammar test, HellaSwag, and one script for 8 tests (TinyStories and FineWeb-Edu
+  loss per character, BLiMP, HellaSwag, LAMBADA, PIQA, ARC-Easy, WinoGrande) with a comparison table.
+- Step 10: tokenizer fit check, 8K tokenizer, FineWeb-Edu + TinyStories data pipeline (multi-core
+  encoding, held-out val/test), model-7 design, single-GPU training (bf16, gradient accumulation,
+  resumable checkpoints, speed test), a Colab notebook and a script to try the model.
+- Logs no longer include device names or run times.
+
 ## 1.0.0 — 2026-11-20
 
 First release: eight steps from a character bigram to a GPT that writes short stories, all written

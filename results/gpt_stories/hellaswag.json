@@ -1,0 +1,10 @@
+{
+  "model": "gpt_stories",
+  "questions": 10042,
+  "acc": 26.06,
+  "acc_norm": 26.22,
+  "by_source_acc_norm": {
+    "ActivityNet (video scenes)": 31.33,
+    "WikiHow (how-to steps)": 23.78
+  }
+}

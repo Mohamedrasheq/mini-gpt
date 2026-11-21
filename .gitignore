@@ -6,11 +6,28 @@ __pycache__/
 # macOS
 .DS_Store
 
-# Model weights (large; re-create with gpt.py, or publish separately)
+# Model weights (large; re-create with the training steps)
 *.pt
 
-# Encoded data (re-create with tokenizer.py and bpe_tokenizer.py)
+# Encoded data (re-create with steps 2 and 7)
 data/*.bin
 
 # TinyStories (step 8): large, CDLA-Sharing licence; re-download with step08_tinystories_data.py
 data/tinystories/
+
+# BLiMP test files (step 9): re-download with step09_blimp.py
+data/blimp/
+
+# HellaSwag test file (step 9b): re-download with step09b_hellaswag.py
+data/hellaswag/
+
+# Benchmark test sets (step 9c): re-download with step09c_benchmarks.py
+data/benchmarks/
+
+# FineWeb-Edu data (step 10): re-download with step10b_data.py. The 8K tokenizer is kept.
+data/fineweb/*
+!data/fineweb/tokenizer_8k.json
+
+# Step 10: Colab upload bundle and test runs
+step10_bundle.zip
+results/gpt_fineweb_smoke/

@@ -1,0 +1,44 @@
+{
+  "model": "fineweb",
+  "parameters": 29893120,
+  "tests": {
+    "tinystories": {
+      "loss_per_char": 0.3968,
+      "chars_per_token": 3.84,
+      "items": 11268114
+    },
+    "fineweb_edu": {
+      "loss_per_char": 0.7904,
+      "chars_per_token": 3.86,
+      "items": 23629792
+    },
+    "blimp": {
+      "acc": 76.05,
+      "items": 67000
+    },
+    "hellaswag": {
+      "acc": 27.24,
+      "acc_norm": 27.91,
+      "items": 10042
+    },
+    "lambada": {
+      "acc": 22.1,
+      "perplexity": 9.7,
+      "items": 5153
+    },
+    "piqa": {
+      "acc": 59.63,
+      "acc_norm": 58.22,
+      "items": 1838
+    },
+    "arc_easy": {
+      "acc": 44.11,
+      "acc_norm": 39.9,
+      "items": 2376
+    },
+    "winogrande": {
+      "acc": 50.67,
+      "items": 1267
+    }
+  }
+}
