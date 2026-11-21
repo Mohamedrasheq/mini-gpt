@@ -1,6 +1,6 @@
 # mini-gpt
 
-**Version 2.0.0** · [Changelog](CHANGELOG.md) · MIT license
+**Version 2.0.0** · [Changelog](CHANGELOG.md) · MIT license · Weights: [rasheq/mini-gpt-30m](https://huggingface.co/rasheq/mini-gpt-30m) on Hugging Face
 
 A 30M-parameter GPT language model built from scratch in plain PyTorch and trained on 2 billion
 tokens of English: our own tokenizer, model, data pipeline, training loop and test suite.
@@ -94,12 +94,13 @@ python -m venv .venv
 `tokenizer.py` only needs to run if you want to re-learn the tokenizer; the learned one is included.
 For the GPT-2 reference, also `pip install transformers`. The code picks the best device it finds:
 an NVIDIA GPU (CUDA), an Apple GPU (MPS) or the CPU. Tested with Python 3.14 and PyTorch 2.15.
-Trained weights are not in the repo.
+
+The trained model 7 weights are on Hugging Face: [rasheq/mini-gpt-30m](https://huggingface.co/rasheq/mini-gpt-30m)
+(`model.safetensors` + tokenizer + a `generate.py` to try it).
 
 ## Next
 
 - Train the same design on more tokens (4-6B), then a slightly larger model.
-- Publish the trained weights with a model card.
 
 ## Data
 
