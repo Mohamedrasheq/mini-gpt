@@ -1,5 +1,5 @@
 """
-Step 10: train the ~30M model (step10_model.py) on the FineWeb-Edu + TinyStories mix (step 10b).
+Train the ~30M model (model.py) on the FineWeb-Edu + TinyStories mix (prepare_data.py).
 
 Made for one NVIDIA GPU (e.g. a Colab GPU runtime); also runs on an Apple GPU or the CPU for small tests.
   - 16-bit math (bf16) on GPUs that support it; the master weights stay 32-bit
@@ -11,9 +11,9 @@ Made for one NVIDIA GPU (e.g. a Colab GPU runtime); also runs on an Apple GPU or
     run the same command again and it continues from the last checkpoint
 
 Run:
-  python step10_train.py --data /content/data --out /content/drive/MyDrive/mini-gpt/gpt_fineweb
-  python step10_train.py --data ... --out ... --speed_test     # 30 steps: speed and full-run time estimate
-  python step10_train.py --smoke                               # tiny model + quick data (step 10b --quick)
+  python train.py --data /content/data --out /content/drive/MyDrive/mini-gpt/model7
+  python train.py --data ... --out ... --speed_test     # 30 steps: speed and full-run time estimate
+  python train.py --smoke                               # tiny model + quick data (prepare_data.py --quick)
 """
 
 import argparse
@@ -27,13 +27,13 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from step08_tinystories_tokenizer import StoryTokenizer
-from step10_model import GPT, Config
+from model import GPT, Config
+from tokenizer import Tokenizer
 
 p = argparse.ArgumentParser()
 p.add_argument("--data", default="data/fineweb")
-p.add_argument("--out", default="results/gpt_fineweb")
-p.add_argument("--tokenizer", default="data/fineweb/tokenizer_8k.json")
+p.add_argument("--out", default="results/model7")
+p.add_argument("--tokenizer", default="data/tokenizer_8k.json")
 p.add_argument("--tokens", type=float, default=0, help="training tokens (default: all in the train files)")
 p.add_argument("--batch_tokens", type=int, default=262_144)
 p.add_argument("--micro", type=int, default=64, help="sequences per micro-batch (lower it if out of memory)")
@@ -53,8 +53,8 @@ p.add_argument("--steps", type=int, default=0, help="stop after this many steps 
 args = p.parse_args()
 
 if args.smoke:                                   # tiny everything: a quick check of the whole code path
-    args.data, args.out = "data/fineweb/quick", "results/gpt_fineweb_smoke"
-    args.tokenizer = "data/fineweb/tokenizer_8k_quick.json"
+    args.data, args.out = "data/fineweb/quick", "results/smoke_test"
+    args.tokenizer = "data/tokenizer_8k_quick.json"
     args.batch_tokens, args.micro, args.warmup = 8 * 128 * 2, 8, 5
     args.eval_every, args.eval_batches, args.save_every, args.sample_every = 10, 4, 10, 20
     args.steps = args.steps or 30
@@ -74,7 +74,7 @@ out = Path(args.out)
 out.mkdir(parents=True, exist_ok=True)
 fw = {s: np.memmap(data / f"fw_{s}.bin", dtype=np.uint16, mode="r") for s in ("train", "val")}
 st = {s: np.memmap(data / f"st_{s}.bin", dtype=np.uint16, mode="r") for s in ("train", "val")}
-tok = StoryTokenizer.load(args.tokenizer)
+tok = Tokenizer.load(args.tokenizer)
 assert tok.vocab_size == cfg.vocab_size, f"tokenizer has {tok.vocab_size} pieces, model expects {cfg.vocab_size}"
 
 T = cfg.block_size

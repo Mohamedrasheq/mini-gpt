@@ -1,22 +1,22 @@
 """
-Step 10b: download FineWeb-Edu + TinyStories and turn them into token files for training.
+Download FineWeb-Edu + TinyStories and turn them into token files for training.
 
-Mix: ~1.8B FineWeb-Edu tokens (90%) + ~0.2B TinyStories tokens (10%), with the 8K tokenizer (step 10a).
+Mix: ~1.8B FineWeb-Edu tokens (90%) + ~0.2B TinyStories tokens (10%), with the 8K tokenizer (tokenizer.py).
 
   FineWeb-Edu (sample-10BT, 14 parquet files of ~2.15 GB each; ODC-By 1.0)
     train      : files 000-002, read in order until 1.8B tokens
     val / test : 5,000 + 5,000 documents from file 013 (never used for training or the tokenizer)
   TinyStories (V2, GPT-4; CDLA-Sharing-1.0)
     train      : the start of the official train file, until 0.2B tokens
-    val / test : first / second half of the official valid file (same split as step 8)
+    val / test : first / second half of the official valid file
 
 Each document ends with the end-of-text token. Encoding runs on all CPU cores.
 Made to run on Colab (fast download from Hugging Face), works on any computer.
 
 Run:
-  python step10b_data.py                       # full: ~7 GB download, writes ~4 GB of token files
-  python step10b_data.py --quick               # small test: file 013 only (0.54 GB), 20M + 2M tokens
-  python step10b_data.py --out /content/data   # where to write (default data/fineweb)
+  python prepare_data.py                       # full: ~7 GB download, writes ~4 GB of token files
+  python prepare_data.py --quick               # small test: file 013 only (0.54 GB), 20M + 2M tokens
+  python prepare_data.py --out /content/data   # where to write (default data/fineweb)
 Writes fw_train.bin, fw_val.bin, fw_test.bin, st_train.bin, st_val.bin, st_test.bin (uint16)
 """
 
@@ -30,8 +30,7 @@ from pathlib import Path
 
 import numpy as np
 
-from step08_tinystories_tokenizer import EOT, StoryTokenizer
-from step10a_tokenizer import tokenizer_path
+from tokenizer import DATA, EOT, Tokenizer
 
 FW_URL = "https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu/resolve/main/sample/10BT/{}_00000.parquet"
 ST_URL = "https://huggingface.co/datasets/roneneldan/TinyStories/resolve/main/TinyStoriesV2-GPT4-{}.txt"
@@ -43,7 +42,7 @@ _tok = None
 
 def _init(merges):
     global _tok
-    _tok = StoryTokenizer(merges)
+    _tok = Tokenizer(merges)
 
 
 def _encode_docs(docs):
@@ -125,7 +124,7 @@ if __name__ == "__main__":
 
     fw_target, st_target = (20_000_000, 2_000_000) if args.quick else (1_800_000_000, 200_000_000)
     train_files = [HELDOUT_FILE] if args.quick else ["000", "001", "002"]
-    tok = StoryTokenizer.load(tokenizer_path(args.quick))
+    tok = Tokenizer.load(DATA / ("tokenizer_8k_quick.json" if args.quick else "tokenizer_8k.json"))
     workers = os.cpu_count() or 2
     print(f"Tokenizer: {tok.vocab_size:,} pieces | workers: {workers} | output: {out}\n")
 

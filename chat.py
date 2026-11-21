@@ -1,32 +1,32 @@
 """
-Step 10: try model 7. Give it a start, it continues the text.
+Try model 7: give it a start, it continues the text.
 (A base model, not a chat assistant: it continues text in the style of what it read.)
 
 Run:
-  .venv/bin/python step10_chat.py                                     # type starts one by one
-  .venv/bin/python step10_chat.py "The water cycle is"                # one start, then exit
-  .venv/bin/python step10_chat.py "Once upon a time" --temperature 0.7 --seed 1
+  .venv/bin/python chat.py                                     # type starts one by one
+  .venv/bin/python chat.py "The water cycle is"                # one start, then exit
+  .venv/bin/python chat.py "Once upon a time" --temperature 0.7 --seed 1
 
 Settings: --temperature (0.7 = safer, 1.0 = more varied), --top_k (pick from the k likeliest tokens),
 --tokens (how many to write), --seed (same seed + same settings = same text). Empty line = quit.
-Needs results/gpt_fineweb/best.pt and data/fineweb/tokenizer_8k.json.
+Needs results/model7/best.pt (from train.py) and data/tokenizer_8k.json.
 """
 
 import argparse
 
 import torch
 
-from step08_tinystories_tokenizer import StoryTokenizer
-from step10_model import GPT, Config
+from model import GPT, Config
+from tokenizer import Tokenizer
 
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 
-def load(ckpt="results/gpt_fineweb/best.pt", tokenizer="data/fineweb/tokenizer_8k.json"):
+def load(ckpt="results/model7/best.pt", tokenizer="data/tokenizer_8k.json"):
     ck = torch.load(ckpt, map_location=device, weights_only=True)
     model = GPT(Config(**ck["config"])).to(device).eval()
     model.load_state_dict(ck["model"])
-    return model, StoryTokenizer.load(tokenizer)
+    return model, Tokenizer.load(tokenizer)
 
 
 @torch.no_grad()

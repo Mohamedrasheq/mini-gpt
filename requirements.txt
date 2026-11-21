@@ -1,3 +1,5 @@
 torch>=2.4
 numpy>=1.26
-pyarrow>=14   # step 10b: reads FineWeb-Edu parquet files
+pyarrow>=14          # reads the FineWeb-Edu parquet files
+# optional, only for evaluate.py --model gpt2:
+# transformers>=4.40
