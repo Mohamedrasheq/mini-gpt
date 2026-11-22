@@ -17,3 +17,6 @@ data/*
 # Colab upload bundle and test runs
 mini-gpt.zip
 results/smoke_test/
+
+# Hugging Face release package (weights + model card), uploaded to rasheq/mini-gpt-30m
+hf_release/
